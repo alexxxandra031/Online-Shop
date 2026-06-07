@@ -1,31 +1,38 @@
 #include "authwindow.h"
-#include "clientmanager.h"
-#include <QMessageBox>
+#include "ui_authwindow.h"
+#include "mainwindow.h"
 
-AuthWindow::AuthWindow(QWidget *parent) : QDialog(parent) /* , ui(new Ui::AuthWindow) */ {
+AuthWindow::AuthWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::AuthWindow)
+{
+    ui->setupUi(this);
 
-    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, &AuthWindow::onDataReceived);
+    connect(ui->btnGoToRegister, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(ui->pageRegister);
+    });
+
+
+    connect(ui->btnBackToLogin, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(ui->pageLogin);
+    });
+
+
+    connect(ui->btnLogin, &QPushButton::clicked, this, [this]() {
+
+        MainWindow *mainWin = new MainWindow();
+        mainWin->setAttribute(Qt::WA_DeleteOnClose);
+        mainWin->show();
+
+        this->hide();
+    });
 }
 
-AuthWindow::~AuthWindow() {
-
+AuthWindow::~AuthWindow()
+{
+    delete ui;
 }
 
-QString AuthWindow::getRole() const { return m_role; }
-int AuthWindow::getUserId() const { return m_userId; }
 
-bool AuthWindow::validatePassword(const QString &password) {
-    return true;
-}
 
-void AuthWindow::on_loginButton_clicked() {
 
-}
-
-void AuthWindow::on_registerButton_clicked() {
-
-}
-
-void AuthWindow::onDataReceived(const QString &data) {
-
-}

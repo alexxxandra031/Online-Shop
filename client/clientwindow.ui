@@ -1,19 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>ClientWindow</class>
+ <widget class="QMainWindow" name="ClientWindow">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>400</width>
-    <height>300</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>850</width><height>550</height></rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Кабинет Покупателя</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="mainLayout">
+    <item>
+     <layout class="QVBoxLayout" name="sideMenuLayout">
+      <item>
+       <widget class="QPushButton" name="btnCatalog">
+        <property name="text"><string>Каталог товаров</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnNewOrder">
+        <property name="text"><string>Оформить заказ</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnHistory">
+        <property name="text"><string>Мои заказы</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnProfile">
+        <property name="text"><string>Мой профиль</string></property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation"><enum>Qt::Vertical</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="pageCatalog">
+       <layout class="QVBoxLayout" name="catLayout">
+        <item>
+         <widget class="QLabel" name="lblCat"><property name="text"><string>Витрина товаров (Только просмотр)</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableCatalog"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageNewOrder">
+       <layout class="QVBoxLayout" name="orderLayout">
+        <item>
+         <widget class="QLabel" name="lblOrd"><property name="text"><string>Добавление товара в корзину:</string></property></widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="inputLayout">
+          <item>
+           <widget class="QLineEdit" name="lineProductId"><property name="placeholderText"><string>ID Товара</string></property></widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinQuantity"><property name="minimum"><number>1</number></property></widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnAddToBasket"><property name="text"><string>Добавить</string></property></widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableCart"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSubmitOrder"><property name="text"><string>Отправить и оформить заказ</string></property></widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageHistory">
+       <layout class="QVBoxLayout" name="histLayout">
+        <item>
+         <widget class="QLabel" name="lblHist"><property name="text"><string>История ваших заказов:</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableHistory"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageProfile">
+       <layout class="QVBoxLayout" name="profLayout">
+        <item>
+         <widget class="QLabel" name="lblProf"><property name="text"><string>Редактирование личных данных:</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineFirstName"><property name="placeholderText"><string>Имя</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineLastName"><property name="placeholderText"><string>Фамилия</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="linePhone"><property name="placeholderText"><string>Телефон</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEmail"><property name="placeholderText"><string>Email</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="linePassword"><property name="placeholderText"><string>Новый пароль</string></property><property name="echoMode"><enum>QLineEdit::Password</enum></property></widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSaveProfile"><property name="text"><string>Сохранить изменения</string></property></widget>
+        </item>
+        <item>
+         <spacer name="profSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
- <resources/>
- <connections/>
 </ui>

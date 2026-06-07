@@ -1,10 +1,23 @@
 #ifndef ADMINWINDOW_H
 #define ADMINWINDOW_H
 
-class adminwindow
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class AdminWindow; }
+QT_END_NAMESPACE
+
+class AdminWindow : public QMainWindow
 {
+    Q_OBJECT
+
 public:
-    adminwindow();
+    explicit AdminWindow(QWidget *parent = nullptr);
+    ~AdminWindow();
+
+private:
+    Ui::AdminWindow *ui;
 };
+
 
 #endif // ADMINWINDOW_H

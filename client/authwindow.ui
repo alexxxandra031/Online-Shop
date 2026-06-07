@@ -1,19 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>AuthWindow</class>
+ <widget class="QMainWindow" name="AuthWindow">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>400</width>
-    <height>300</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>400</width><height>450</height></rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Авторизация</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="pageLogin">
+       <layout class="QVBoxLayout" name="loginLayout">
+        <item>
+         <spacer name="s1">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblLoginTitle">
+          <property name="text"><string>Вход в систему</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineLoginEmail">
+          <property name="placeholderText"><string>Email (Логин)</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineLoginPassword">
+          <property name="placeholderText"><string>Пароль</string></property>
+          <property name="echoMode"><enum>QLineEdit::Password</enum></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnLogin">
+          <property name="text"><string>Войти</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnGoToRegister">
+          <property name="text"><string>Нет аккаунта? Регистрация</string></property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="s2">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageRegister">
+       <layout class="QVBoxLayout" name="regLayout">
+        <item>
+         <widget class="QLabel" name="lblRegTitle">
+          <property name="text"><string>Регистрация профиля</string></property>
+          <property name="alignment"><set>Qt::AlignCenter</set></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineRegLastName">
+          <property name="placeholderText"><string>Фамилия</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineRegFirstName">
+          <property name="placeholderText"><string>Имя</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineRegPhone">
+          <property name="placeholderText"><string>Телефон</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineRegEmail">
+          <property name="placeholderText"><string>Email</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineRegPassword">
+          <property name="placeholderText"><string>Придумайте пароль</string></property>
+          <property name="echoMode"><enum>QLineEdit::Password</enum></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnRegisterSubmit">
+          <property name="text"><string>Зарегистрироваться</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnBackToLogin">
+          <property name="text"><string>Назад к авторизации</string></property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
- <resources/>
- <connections/>
 </ui>

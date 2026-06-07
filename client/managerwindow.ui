@@ -1,19 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>ManagerWindow</class>
+ <widget class="QMainWindow" name="ManagerWindow">
   <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>400</width>
-    <height>300</height>
-   </rect>
+   <rect><x>0</x><y>0</y><width>850</width><height>550</height></rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Рабочее место Менеджера</string>
   </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="mainLayout">
+    <item>
+     <layout class="QVBoxLayout" name="sideMenuLayout">
+      <item>
+       <widget class="QPushButton" name="btnStock">
+        <property name="text"><string>Управление складом</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnOrders">
+        <property name="text"><string>Обработка доставки</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnClients">
+        <property name="text"><string>База клиентов</string></property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnProfile">
+        <property name="text"><string>Мой профиль</string></property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation"><enum>Qt::Vertical</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="pageStock">
+       <layout class="QVBoxLayout" name="stockLayout">
+        <item>
+         <widget class="QLabel" name="lblStock"><property name="text"><string>Редактирование цен и остатков (Изменение разрешено, удаление запрещено)</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableStock"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSaveStock"><property name="text"><string>Сохранить изменения цен/количества</string></property></widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageOrders">
+       <layout class="QVBoxLayout" name="ordersLayout">
+        <item>
+         <widget class="QLabel" name="lblOrd"><property name="text"><string>Назначение даты доставки для новых заказов:</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableOrders"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="deliveryDateLayout">
+          <item>
+           <widget class="QLabel" name="lblDate"><property name="text"><string>Дата доставки:</string></property></widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="dateDelivery"><property name="calendarPopup"><bool>true</bool></property></widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSetDelivery"><property name="text"><string>Установить дату доставки</string></property></widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageClients">
+       <layout class="QVBoxLayout" name="clientsLayout">
+        <item>
+         <widget class="QLabel" name="lblCl"><property name="text"><string>Просмотр списка зарегистрированных покупателей (Только чтение)</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableClients"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pageProfile">
+       <layout class="QVBoxLayout" name="profLayout">
+        <item>
+         <widget class="QLabel" name="lblProf"><property name="text"><string>Личный профиль сотрудника:</string></property></widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEmail">
+          <property name="placeholderText"><string>Email (Логин)</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="linePassword">
+          <property name="placeholderText"><string>Новый пароль</string></property>
+          <property name="echoMode"><enum>QLineEdit::Password</enum></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSaveProfile"><property name="text"><string>Обновить данные профиля</string></property></widget>
+        </item>
+        <item>
+         <spacer name="profSpacer">
+          <property name="orientation"><enum>Qt::Vertical</enum></property>
+          <property name="sizeHint" stdset="0"><size><width>20</width><height>40</height></size></property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
- <resources/>
- <connections/>
 </ui>

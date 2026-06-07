@@ -1,34 +1,22 @@
 #ifndef AUTHWINDOW_H
 #define AUTHWINDOW_H
 
-#include <QDialog>
-#include <QRegularExpression>
+#include <QMainWindow>
 
+QT_BEGIN_NAMESPACE
 namespace Ui { class AuthWindow; }
+QT_END_NAMESPACE
 
-class AuthWindow : public QDialog {
+class AuthWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
-    explicit AuthWindow(QWidget *parent = nullptr);
+    AuthWindow(QWidget *parent = nullptr);
     ~AuthWindow();
 
-    QString getRole() const;
-    int getUserId() const;
-
-private slots:
-    void on_loginButton_clicked();
-    void on_registerButton_clicked();
-    void onDataReceived(const QString &data);
-
 private:
-    Ui::AuthWindow *ui;
-
-    QString m_role;
-    int m_userId = -1;
-
-    // проверка пароля???
-    bool validatePassword(const QString &password);
+    Ui::AuthWindow *ui; //
 };
 
 #endif // AUTHWINDOW_H

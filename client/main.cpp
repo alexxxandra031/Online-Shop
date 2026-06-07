@@ -1,11 +1,11 @@
 #include <QApplication>
-#include "mainwindow.h" 
+#include "authwindow.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     
-    MainWindow mainwindow;
-    mainwindow.show(); 
+    AuthWindow authWin;
+    authWin.show();
     
     return a.exec();
 }

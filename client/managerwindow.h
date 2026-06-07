@@ -1,10 +1,27 @@
 #ifndef MANAGERWINDOW_H
 #define MANAGERWINDOW_H
 
-class managerwindow
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class ManagerWindow; }
+QT_END_NAMESPACE
+
+class ManagerWindow : public QMainWindow
 {
+    Q_OBJECT
+
 public:
-    managerwindow();
+    explicit ManagerWindow(QWidget *parent = nullptr);
+    ~ManagerWindow();
+
+private:
+    Ui::ManagerWindow *ui;
 };
 
+
 #endif // MANAGERWINDOW_H
+
+
+
+
