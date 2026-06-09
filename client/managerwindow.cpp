@@ -6,22 +6,97 @@ ManagerWindow::ManagerWindow(QWidget *parent)
     , ui(new Ui::ManagerWindow)
 {
     ui->setupUi(this);
+    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
+        QStringList parts = data.split("|");
+        QString command = parts.value(0);
 
+        if (command == "PRODUCTS_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "название", "цена", "остаток"});
+
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
+                for (const QString &r : rows) {
+                    QList<QStandardItem*> items;
+                    for (const QString &c : r.split(";")) items.append(new QStandardItem(c));
+                    model->appendRow(items);
+                }
+            }
+            ui->tableStock->setModel(model);
+            ui->tableStock->horizontalHeader()->setStretchLastSection(true);
+        }
+        else if (command == "ALL_ORDERS_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "дата_продажи", "доставка", "сумма", "id_клиента"});
+
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
+                for (const QString &r : rows) {
+                    QList<QStandardItem*> items;
+                    for (const QString &c : r.split(";")) items.append(new QStandardItem(c));
+                    model->appendRow(items);
+                }
+            }
+            ui->tableOrders->setModel(model);
+            ui->tableOrders->horizontalHeader()->setStretchLastSection(true);
+        }
+        else if (command == "CLIENTS_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "фамилия", "имя", "email", "телефон"});
+
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
+                for (const QString &r : rows) {
+                    QList<QStandardItem*> items;
+                    for (const QString &c : r.split(";")) items.append(new QStandardItem(c));
+                    model->appendRow(items);
+                }
+            }
+            ui->tableClients->setModel(model);
+            ui->tableClients->horizontalHeader()->setStretchLastSection(true);
+        }
+        else if (command == "UPDATE_DELIVERY_OK") {
+            QMessageBox::information(this, "успех", "дата доставки назначена");
+            ClientManager::getInstance()->sendRequest("GET_ALL_ORDERS");
+        }
+    });
 
     connect(ui->btnStock, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageStock);
+        ClientManager::getInstance()->sendRequest("GET_PRODUCTS");
     });
 
     connect(ui->btnOrders, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageOrders);
+        ClientManager::getInstance()->sendRequest("GET_ALL_ORDERS");
     });
 
     connect(ui->btnClients, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageClients);
+        ClientManager::getInstance()->sendRequest("GET_CLIENTS");
     });
 
     connect(ui->btnProfile, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageProfile);
+    });
+
+
+
+    connect(ui->btnSetDelivery, &QPushButton::clicked, this, [this]() {
+        // для теста берем id заказа 1 (в идеале нужно брать выделенную строку таблицы)
+        QString date = ui->dateDelivery->date().toString("dd.MM.yyyy");
+        QString req = QString("UPDATE_DELIVERY|1|%1").arg(date);
+
+        ClientManager::getInstance()->sendRequest(req);
+    });
+
+    connect(ui->btnSaveProfile, &QPushButton::clicked, this, [this]() {
+        QString email = ui->lineEmail->text();
+        QString password = ui->linePassword->text();
+
+        //ЗАГЛУШКА
+        QString req = QString("UPDATE_PROFILE|202|Сотрудник|Менеджер|%1|нет|%2").arg(email).arg(password);
+        ClientManager::getInstance()->sendRequest(req);
     });
 }
 

@@ -75,6 +75,30 @@ void ClientHandler::parseRequest(const QString& request) {
         if (parts.size() != 3) { sendToClient("ERROR|INVALID_FORMAT"); return; }
         handleUpdateDelivery(parts[1], parts[2]);
     }
+    else if (command == "UPDATE_CATEGORY") {
+        if (parts.size() != 3) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleUpdateCategory(parts[1], parts[2]);
+    }
+    else if (command == "DELETE_CATEGORY") {
+        if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleDeleteCategory(parts[1]);
+    }
+    else if (command == "ADD_DISCOUNT") {
+        if (parts.size() != 4) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleAddDiscount(parts[1], parts[2], parts[3]);
+    }
+    else if (command == "UPDATE_DISCOUNT") {
+        if (parts.size() != 5) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleUpdateDiscount(parts[1], parts[2], parts[3], parts[4]);
+    }
+    else if (command == "DELETE_DISCOUNT") {
+        if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleDeleteDiscount(parts[1]);
+    }
+    else if (command == "ADD_MANAGER") {
+        if (parts.size() != 3) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleAddManager(parts[1], parts[2]);
+    }
     else {
         sendToClient("ERROR|UNKNOWN_COMMAND");
     }
@@ -163,5 +187,30 @@ void ClientHandler::handleGetClientOrders(const QString& client_id) {
 }
 
 void ClientHandler::handleUpdateDelivery(const QString& order_id, const QString& date) {
+
+}
+
+void ClientHandler::handleUpdateCategory(const QString& id, const QString& name) {
+
+}
+
+void ClientHandler::handleDeleteCategory(const QString& id) {
+
+}
+
+void ClientHandler::handleAddDiscount(const QString& type, const QString& min_sum, const QString& percent) {
+
+}
+
+void ClientHandler::handleUpdateDiscount(const QString& id, const QString& type, const QString& min_sum, const QString& percent) {
+
+}
+
+void ClientHandler::handleDeleteDiscount(const QString& id) {
+
+}
+
+
+void ClientHandler::handleAddManager(const QString& email, const QString& password) {
 
 }

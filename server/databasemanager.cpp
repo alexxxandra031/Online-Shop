@@ -86,3 +86,27 @@ QList<Order> DatabaseManager::getClientOrders(int id_client) {
 bool DatabaseManager::updateOrderDeliveryDate(int id_order, const QString& date) {
     return true;
 }
+
+bool DatabaseManager::updateCategory(const Category& category) {
+    return true;
+}
+
+bool DatabaseManager::deleteCategory(int id_category) {
+    return true;
+}
+
+bool DatabaseManager::addDiscount(const Discount& discount) {
+    return true;
+}
+
+bool DatabaseManager::updateDiscount(const Discount& discount) {
+    return true;
+}
+
+bool DatabaseManager::deleteDiscount(int id_discount) {
+    return true;
+}
+
+bool DatabaseManager::addManager(const QString& email, const QString& password) {
+    return true;
+}

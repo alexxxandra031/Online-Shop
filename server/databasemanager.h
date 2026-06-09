@@ -40,15 +40,23 @@ public:
     bool updateProduct(const Product& product);
     bool deleteProduct(int id_product);
     bool addCategory(const Category& category);
+    bool updateCategory(const Category& category);
+    bool deleteCategory(int id_category);
 
     // блок работы со скидками
     QList<Discount> getAllDiscounts();
+    bool addDiscount(const Discount& discount);
+    bool updateDiscount(const Discount& discount);
+    bool deleteDiscount(int id_discount);
 
     // блок работы с заказами
     bool createOrder(int id_client, const QList<OrderItem>& items);
     QList<Order> getAllOrders();
     QList<Order> getClientOrders(int id_client);
     bool updateOrderDeliveryDate(int id_order, const QString& date);
+
+    // создание менеджера
+    bool addManager(const QString& email, const QString& password);
 
     friend class DatabaseDestroyer;
 };

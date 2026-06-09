@@ -2,6 +2,9 @@
 #define CLIENTWINDOW_H
 
 #include <QMainWindow>
+#include "clientmanager.h"
+#include <QStandardItemModel>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ClientWindow; }
