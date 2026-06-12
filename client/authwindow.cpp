@@ -32,6 +32,9 @@ AuthWindow::AuthWindow(QWidget *parent)
         }
     });
 
+    connect(ClientManager::getInstance(), &ClientManager::errorOccurred, this, [this](const QString &error) {
+        QMessageBox::critical(this, "ошибка сети", "не удалось подключиться к серверу:\n" + error);
+    });
 
     connect(ui->btnGoToRegister, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageRegister);
