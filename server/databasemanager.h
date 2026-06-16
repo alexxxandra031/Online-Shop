@@ -3,6 +3,10 @@
 
 #include <QList>
 #include <QString>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QDebug>
 #include "models.h"
 
 class DatabaseManager;
@@ -27,10 +31,10 @@ public:
     static DatabaseManager* getInstance();
 
     // блок работы с пользователями
-    bool loginUser(const QString& email, const QString& password, QString& outRole, int& outId);
-    bool registerClient(const Client& client);
-    bool updateClientProfile(const Client& client);
-    QList<Client> getAllClients();
+    bool loginUser(const QString& email, const QString& password, QStringList& outRoles, int& outId);
+    bool registerClient(const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password);
+    bool updateClientProfile(int id_user, const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password);
+    QStringList getAllClients();
     bool deleteClient(int id_client);
 
     // блок работы с товарами и категориями

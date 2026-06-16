@@ -127,23 +127,21 @@ void ClientHandler::handleLogout() {
 
 
 void ClientHandler::handleLogin(const QString& email, const QString& password) {
-    QString role;
+    QStringList roles;
     int id;
 
-    if (DatabaseManager::getInstance()->loginUser(email, password, role, id)) {
+    if (DatabaseManager::getInstance()->loginUser(email, password, roles, id)) {
         m_userId = id;
-        m_role = role;
-        sendToClient(QString("LOGIN_OK|%1|%2").arg(role).arg(id));
+        m_role = roles.join(",");
+        sendToClient(QString("LOGIN_OK|%1|%2").arg(m_role).arg(id));
     } else {
         sendToClient("LOGIN_FAIL|неверный логин или пароль");
     }
 }
 
 void ClientHandler::handleRegister(const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password) {
-    Client c;
-    c.surname = surname; c.name = name; c.email = email; c.phone = phone; c.password_hash = password;
 
-    if (DatabaseManager::getInstance()->registerClient(c)) {
+    if (DatabaseManager::getInstance()->registerClient(surname, name, email, phone, password)) {
         sendToClient("REGISTER_OK");
     } else {
         sendToClient("REGISTER_FAIL|ошибка при регистрации");
@@ -151,10 +149,8 @@ void ClientHandler::handleRegister(const QString& surname, const QString& name, 
 }
 
 void ClientHandler::handleUpdateProfile(const QString& id, const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password) {
-    Client c;
-    c.id_client = id.toInt(); c.surname = surname; c.name = name; c.email = email; c.phone = phone; c.password_hash = password;
 
-    if (DatabaseManager::getInstance()->updateClientProfile(c)) {
+    if (DatabaseManager::getInstance()->updateClientProfile(id.toInt(), surname, name, email, phone, password)) {
         sendToClient("UPDATE_PROFILE_OK|профиль обновлен");
     } else {
         sendToClient("UPDATE_PROFILE_FAIL|ошибка обновления");
@@ -162,12 +158,7 @@ void ClientHandler::handleUpdateProfile(const QString& id, const QString& surnam
 }
 
 void ClientHandler::handleGetClients() {
-    QList<Client> clients = DatabaseManager::getInstance()->getAllClients();
-    QStringList rows;
-    for (const auto& c : clients) {
-        // id;фамилия;имя;email;телефон
-        rows << QString("%1;%2;%3;%4;%5").arg(c.id_client).arg(c.surname).arg(c.name).arg(c.email).arg(c.phone);
-    }
+    QStringList rows = DatabaseManager::getInstance()->getAllClients();
     sendToClient("CLIENTS_DATA|" + rows.join("#"));
 }
 
@@ -242,19 +233,19 @@ void ClientHandler::handleGetDiscounts() {
     QList<Discount> discs = DatabaseManager::getInstance()->getAllDiscounts();
     QStringList rows;
     for (const auto& d : discs) {
-        rows << QString("%1;%2;%3;%4").arg(d.id_discount).arg(d.type).arg(d.min_order_sum).arg(d.percent);
+        rows << QString("%1;%2;%3;%4").arg(d.id_discount).arg(d.discount_type).arg(d.min_order_sum).arg(d.discount_percent);
     }
     sendToClient("DISCOUNTS_DATA|" + rows.join("#"));
 }
 
 void ClientHandler::handleAddDiscount(const QString& type, const QString& min_sum, const QString& percent) {
-    Discount d; d.type = type; d.min_order_sum = min_sum.toDouble(); d.percent = percent.toDouble();
+    Discount d; d.discount_type = type; d.min_order_sum = min_sum.toDouble(); d.discount_percent = percent.toDouble();
     if (DatabaseManager::getInstance()->addDiscount(d)) sendToClient("ADD_DISCOUNT_OK");
     else sendToClient("ADD_DISCOUNT_FAIL|ошибка");
 }
 
 void ClientHandler::handleUpdateDiscount(const QString& id, const QString& type, const QString& min_sum, const QString& percent) {
-    Discount d; d.id_discount = id.toInt(); d.type = type; d.min_order_sum = min_sum.toDouble(); d.percent = percent.toDouble();
+    Discount d; d.id_discount = id.toInt(); d.discount_type = type; d.min_order_sum = min_sum.toDouble(); d.discount_percent = percent.toDouble();
     if (DatabaseManager::getInstance()->updateDiscount(d)) sendToClient("UPDATE_DISCOUNT_OK");
     else sendToClient("UPDATE_DISCOUNT_FAIL|ошибка");
 }

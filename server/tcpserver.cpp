@@ -1,10 +1,11 @@
 #include "tcpserver.h"
 #include "clienthandler.h"
+#include "databasemanager.h"
 #include <QDebug>
 
 TcpServer::TcpServer(QObject *parent) : QObject(parent) {
     m_tcpServer = new QTcpServer(this);
-
+    DatabaseManager::getInstance();
     connect(m_tcpServer, &QTcpServer::newConnection, this, &TcpServer::slotNewConnection);
 
     if(!m_tcpServer->listen(QHostAddress::Any, 33333)) {

@@ -3,6 +3,29 @@
 
 #include <QString>
 
+// роли
+struct Role {
+    int id_role;
+    QString name;
+};
+
+// пользователи
+struct User {
+    int id_user;
+    QString email;
+    QString password_hash;
+};
+
+// профили клиентов
+struct Client {
+    int id_client;
+    QString surname;
+    QString name;
+    QString phone;
+    QString status;
+    int id_user;
+};
+
 // категории
 struct Category {
     int id_category;
@@ -19,24 +42,12 @@ struct Product {
     int id_category;
 };
 
-// клиенты (и пользователи системы)
-struct Client {
-    int id_client;
-    QString surname;
-    QString name;
-    QString email;
-    QString phone;
-    QString status; // стандартный или постоянный
-    QString password_hash; // для авторизации?
-
-};
-
 // скидки
 struct Discount {
     int id_discount;
-    QString type;
+    QString discount_type;
     double min_order_sum;
-    double percent;
+    double discount_percent;
 };
 
 // заказы
@@ -48,14 +59,14 @@ struct Order {
     int id_client;
 };
 
-// позиции заказов
+// товары в корзине
 struct OrderItem {
     int id_order;
     int id_product;
     int quantity;
 };
 
-// скидки заказы
+// информация по скидкам в чеке
 struct OrderDiscount {
     int id_discount;
     int id_order;
