@@ -5,6 +5,7 @@
 #include "clientmanager.h"
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QInputDialog>
 
 
 QT_BEGIN_NAMESPACE

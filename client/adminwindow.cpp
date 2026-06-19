@@ -8,7 +8,6 @@ AdminWindow::AdminWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-
     connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &rawData) {
         QString data = rawData.trimmed();
 
@@ -119,7 +118,6 @@ AdminWindow::AdminWindow(QWidget *parent)
     });
 
     connect(ui->btnAddProduct, &QPushButton::clicked, this, [this]() {
-        // Открыть диалог добавления
         QString name = QInputDialog::getText(this, "Добавить", "Название:");
         if (name.isEmpty()) return;
         double price = QInputDialog::getDouble(this, "Добавить", "Цена:");
@@ -132,7 +130,6 @@ AdminWindow::AdminWindow(QWidget *parent)
             );
     });
 
-
     connect(ui->btnAddEmployee, &QPushButton::clicked, this, [this]() {
         QString email = QInputDialog::getText(this, "Добавить менеджера", "Email:");
         if (email.isEmpty()) return;
@@ -143,6 +140,7 @@ AdminWindow::AdminWindow(QWidget *parent)
             QString("ADD_MANAGER|%1|%2").arg(email).arg(password)
             );
     });
+
     connect(ui->btnDelUser, &QPushButton::clicked, this, [this]() {
         QModelIndex index = ui->tableUsersCrud->currentIndex();
         if (!index.isValid()) {
@@ -168,26 +166,24 @@ AdminWindow::AdminWindow(QWidget *parent)
             );
     });
 
-
-    connect(ui->btnSaveProfile, &QPushButton::clicked, this, [this]() {
-        QString email = ui->lineEmail->text();
-        QString password = ui->linePassword->text();
-
+    // НОВЫЙ ОБРАБОТЧИК СМЕНЫ ПАРОЛЯ
+    connect(ui->btnChangePassword, &QPushButton::clicked, this, [this]() {
+        QString newPassword = ui->lineNewPassword->text();
+        if (newPassword.isEmpty()) {
+            QMessageBox::warning(this, "Ошибка", "Введите новый пароль");
+            return;
+        }
         ClientManager::getInstance()->sendRequest(
-            QString("UPDATE_PROFILE|%1|%2|%3|%4|%5")
-                .arg("Админ").arg("Главный")
-                .arg(email).arg("нет").arg(password) // phone = "нет" (если нет поля)
+            QString("UPDATE_PROFILE|||||%1").arg(newPassword)
             );
     });
 
     connect(ui->btnEditProduct, &QPushButton::clicked, this, [this]() {
-
         QModelIndex index = ui->tableCatalogCrud->currentIndex();
         if (!index.isValid()) {
             QMessageBox::warning(this, "Ошибка", "Выберите товар для редактирования");
             return;
         }
-
 
         QAbstractItemModel *model = ui->tableCatalogCrud->model();
         int row = index.row();
@@ -198,7 +194,6 @@ AdminWindow::AdminWindow(QWidget *parent)
         QString oldUnit = model->data(model->index(row, 3)).toString();
         int oldStock = model->data(model->index(row, 4)).toInt();
         int oldCategory = model->data(model->index(row, 5)).toInt();
-
 
         QString name = QInputDialog::getText(this, "Изменить товар",
                                              "Название:", QLineEdit::Normal, oldName);
@@ -219,7 +214,6 @@ AdminWindow::AdminWindow(QWidget *parent)
         int category = QInputDialog::getInt(this, "Изменить товар",
                                             "ID категории:", oldCategory, 1, 9999999);
 
-
         QString req = QString("UPDATE_PRODUCT|%1|%2|%3|%4|%5|%6")
                           .arg(id)
                           .arg(name)
@@ -231,13 +225,11 @@ AdminWindow::AdminWindow(QWidget *parent)
         ClientManager::getInstance()->sendRequest(req);
     });
 
-
     connect(ui->btnAddCategory, &QPushButton::clicked, this, [this]() {
         QString name = QInputDialog::getText(this, "Добавить категорию", "Название:");
         if (name.isEmpty()) return;
         ClientManager::getInstance()->sendRequest(QString("ADD_CATEGORY|%1").arg(name));
     });
-
 
     connect(ui->btnEditCategory, &QPushButton::clicked, this, [this]() {
         QModelIndex index = ui->tableCategories->currentIndex();
@@ -256,10 +248,6 @@ AdminWindow::AdminWindow(QWidget *parent)
             QString("UPDATE_CATEGORY|%1|%2").arg(catId).arg(newName)
             );
     });
-
-
-
-
 }
 
 AdminWindow::~AdminWindow()

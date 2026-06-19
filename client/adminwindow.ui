@@ -47,6 +47,7 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
+      <!-- Страница "Каталог и Категории" -->
       <widget class="QWidget" name="pageCatalogCrud">
        <layout class="QVBoxLayout" name="catCrudLayout">
         <item>
@@ -75,7 +76,6 @@
             <property name="text"><string>Изменить товар</string></property>
            </widget>
           </item>
-          <!-- Кнопка "Удалить товар" отсутствует -->
          </layout>
         </item>
         <item>
@@ -98,11 +98,11 @@
             <property name="text"><string>Изменить категорию</string></property>
            </widget>
           </item>
-          <!-- Кнопка "Удалить категорию" удалена -->
          </layout>
         </item>
        </layout>
       </widget>
+      <!-- Страница "Управление клиентами" -->
       <widget class="QWidget" name="pageUsersCrud">
        <layout class="QVBoxLayout" name="userCrudLayout">
         <item>
@@ -131,6 +131,7 @@
         </item>
        </layout>
       </widget>
+      <!-- Страница "Система скидок" -->
       <widget class="QWidget" name="pageDiscountsCrud">
        <layout class="QVBoxLayout" name="discLayout">
         <item>
@@ -152,11 +153,11 @@
           <item>
            <widget class="QPushButton" name="btnAddDiscount"><property name="text"><string>Добавить скидку</string></property></widget>
           </item>
-          <!-- Кнопка "Удалить скидку" отсутствует -->
          </layout>
         </item>
        </layout>
       </widget>
+      <!-- Страница "Архив и Выручка" -->
       <widget class="QWidget" name="pageArchive">
        <layout class="QVBoxLayout" name="archiveLayout">
         <item>
@@ -175,32 +176,27 @@
         </item>
        </layout>
       </widget>
+      <!-- Страница "Мой профиль" (упрощённая) -->
       <widget class="QWidget" name="pageProfile">
        <layout class="QVBoxLayout" name="profLayout">
         <item>
          <widget class="QLabel" name="lblInfoProfile">
           <property name="text">
-           <string>Для обновления профиля нажмите кнопку «Мой профиль» слева, затем сохраните изменения.</string>
+           <string>Смена пароля администратора</string>
           </property>
           <property name="wordWrap"><bool>true</bool></property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lblProf"><property name="text"><string>Профиль главного администратора базы данных:</string></property></widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEmail">
-          <property name="placeholderText"><string>Логин Администратора</string></property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="linePassword">
-          <property name="placeholderText"><string>Сменить мастер-пароль</string></property>
+         <widget class="QLineEdit" name="lineNewPassword">
+          <property name="placeholderText"><string>Новый пароль</string></property>
           <property name="echoMode"><enum>QLineEdit::Password</enum></property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btnSaveProfile"><property name="text"><string>Сохранить изменения</string></property></widget>
+         <widget class="QPushButton" name="btnChangePassword">
+          <property name="text"><string>Сменить пароль</string></property>
+         </widget>
         </item>
         <item>
          <spacer name="profSpacer">

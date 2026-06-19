@@ -59,7 +59,9 @@
          <widget class="QTableView" name="tableStock"/>
         </item>
         <item>
-         <widget class="QPushButton" name="btnSaveStock"><property name="text"><string>Сохранить изменения цен/количества</string></property></widget>
+         <widget class="QPushButton" name="btnEditProduct">
+          <property name="text"><string>Изменить товар</string></property>
+         </widget>
         </item>
        </layout>
       </widget>

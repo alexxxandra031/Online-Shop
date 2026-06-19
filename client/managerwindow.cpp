@@ -87,7 +87,6 @@ ManagerWindow::ManagerWindow(QWidget *parent)
 
 
     connect(ui->btnSetDelivery, &QPushButton::clicked, this, [this]() {
-        // для теста берем id заказа 1 (в идеале нужно брать выделенную строку таблицы)
         QString date = ui->dateDelivery->date().toString("dd.MM.yyyy");
         QModelIndex index = ui->tableOrders->currentIndex();
         if (!index.isValid()) {
@@ -111,6 +110,58 @@ ManagerWindow::ManagerWindow(QWidget *parent)
                 .arg("Сотрудник").arg("Менеджер")
                 .arg(email).arg("нет").arg(password)
             );
+    });
+
+    connect(ui->btnEditProduct, &QPushButton::clicked, this, [this]() {
+        QModelIndex index = ui->tableStock->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите товар для редактирования");
+            return;
+        }
+
+        QAbstractItemModel *model = ui->tableStock->model();
+        int row = index.row();
+
+        int id = model->data(model->index(row, 0)).toInt();
+        QString oldName = model->data(model->index(row, 1)).toString();
+        double oldPrice = model->data(model->index(row, 2)).toDouble();
+        QString oldUnit = model->data(model->index(row, 3)).toString();
+        int oldStock = model->data(model->index(row, 4)).toInt();
+        int oldCategory = model->data(model->index(row, 5)).toInt();
+
+
+        QString name = QInputDialog::getText(this, "Изменить товар",
+                                             "Название:", QLineEdit::Normal, oldName);
+        if (name.isEmpty()) return;
+
+
+        double price = QInputDialog::getDouble(this, "Изменить товар",
+                                               "Цена:", oldPrice, 0, 9999999, 2);
+
+        QStringList units = {"шт", "кг", "л", "мм", "г", "мл", "м"};
+        bool ok;
+        QString unit = QInputDialog::getItem(this, "Изменить товар", "Единица измерения:",
+                                             units, units.indexOf(oldUnit), false, &ok);
+        if (!ok) return;
+
+
+        int stock = QInputDialog::getInt(this, "Изменить товар",
+                                         "Количество на складе:", oldStock, 0, 9999999);
+
+
+        int category = QInputDialog::getInt(this, "Изменить товар",
+                                            "ID категории:", oldCategory, 1, 9999999);
+
+
+        QString req = QString("UPDATE_PRODUCT|%1|%2|%3|%4|%5|%6")
+                          .arg(id)
+                          .arg(name)
+                          .arg(price)
+                          .arg(unit)
+                          .arg(stock)
+                          .arg(category);
+
+        ClientManager::getInstance()->sendRequest(req);
     });
 }
 
