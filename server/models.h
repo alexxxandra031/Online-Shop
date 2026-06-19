@@ -13,7 +13,7 @@ struct Role {
 struct User {
     int id_user;
     QString login;
-    QString password_hash;
+    QString password;
 };
 
 // профили клиентов

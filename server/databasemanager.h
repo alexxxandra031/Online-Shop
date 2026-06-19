@@ -25,7 +25,6 @@ class DatabaseManager {
 private:
     static DatabaseManager* p_instance;
     static DatabaseDestroyer destroyer;
-    static QString hashPassword(const QString& password);
     static bool isPasswordValid(const QString& password);
 
 protected:

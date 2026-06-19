@@ -40,15 +40,7 @@ DatabaseManager* DatabaseManager::getInstance() {
 
 
 
-QString DatabaseManager::hashPassword(const QString& password)
-{
-    return QString(
-        QCryptographicHash::hash(
-            password.toUtf8(),
-            QCryptographicHash::Sha256
-            ).toHex()
-        );
-}
+
 
 
 bool DatabaseManager::isPasswordValid(const QString& password)
@@ -80,15 +72,15 @@ int DatabaseManager::getClientIdByUserId(int id_user)
 
 bool DatabaseManager::loginUser(const QString& login, const QString& password, QStringList& outRoles, int& outId) {
     QSqlQuery query;
-    query.prepare("SELECT id_user, password_hash FROM users WHERE login = :login"); // email -> login
+    query.prepare("SELECT id_user, password FROM users WHERE login = :login"); // email -> login
     query.bindValue(":login", login);
 
     if (!query.exec() || !query.next()) return false;
 
     int id_user = query.value(0).toInt();
-    QString db_hash = query.value(1).toString();
+    QString db_password = query.value(1).toString();
 
-    if (db_hash != hashPassword(password))
+    if (db_password != password)
         return false;
 
     outId = id_user;
@@ -117,9 +109,9 @@ bool DatabaseManager::registerClient(const QString& login, const QString& passwo
     db.transaction();
 
     QSqlQuery qUser;
-    qUser.prepare("INSERT INTO users (login, password_hash) VALUES (:login, :pass) RETURNING id_user");
+    qUser.prepare("INSERT INTO users (login, password) VALUES (:login, :pass) RETURNING id_user");
     qUser.bindValue(":login", login);
-    qUser.bindValue(":pass", hashPassword(password));
+    qUser.bindValue(":pass", password);
 
     if (!qUser.exec() || !qUser.next()) {
         db.rollback();
@@ -166,8 +158,8 @@ bool DatabaseManager::updateClientProfile(int id_user, const QString& client_sur
         }
 
         QSqlQuery qUser;
-        qUser.prepare("UPDATE users SET password_hash = :pass WHERE id_user = :id_user");
-        qUser.bindValue(":pass", hashPassword(password));
+        qUser.prepare("UPDATE users SET password = :pass WHERE id_user = :id_user");
+        qUser.bindValue(":pass", password);
         qUser.bindValue(":id_user", id_user);
         if (!qUser.exec()) {
             db.rollback();
@@ -481,9 +473,9 @@ bool DatabaseManager::addManager(const QString& login, const QString& password) 
     db.transaction();
 
     QSqlQuery qUser;
-    qUser.prepare("INSERT INTO users (login, password_hash) VALUES (:login, :pass) RETURNING id_user");
+    qUser.prepare("INSERT INTO users (login, password) VALUES (:login, :pass) RETURNING id_user");
     qUser.bindValue(":login", login);
-    qUser.bindValue(":pass", hashPassword(password));
+    qUser.bindValue(":pass", password);
 
 
 
