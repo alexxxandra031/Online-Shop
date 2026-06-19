@@ -63,9 +63,7 @@
           <item>
            <widget class="QPushButton" name="btnEditProduct"><property name="text"><string>Изменить товар</string></property></widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="btnDelProduct"><property name="text"><string>Удалить товар</string></property></widget>
-          </item>
+          <!-- Кнопка "Удалить товар" удалена -->
          </layout>
         </item>
        </layout>
@@ -103,9 +101,7 @@
           <item>
            <widget class="QPushButton" name="btnAddDiscount"><property name="text"><string>Добавить скидку</string></property></widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="btnDelDiscount"><property name="text"><string>Удалить скидку</string></property></widget>
-          </item>
+          <!-- Кнопка "Удалить скидку" удалена -->
          </layout>
         </item>
        </layout>

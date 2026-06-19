@@ -6,7 +6,9 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QCryptographicHash>
 #include <QDebug>
+#include <QRegularExpression>
 #include "models.h"
 
 class DatabaseManager;
@@ -23,35 +25,38 @@ class DatabaseManager {
 private:
     static DatabaseManager* p_instance;
     static DatabaseDestroyer destroyer;
+    static QString hashPassword(const QString& password);
+    static bool isPasswordValid(const QString& password);
 
 protected:
     DatabaseManager();
 
 public:
     static DatabaseManager* getInstance();
+    int getClientIdByUserId(int id_user);
 
     // блок работы с пользователями
-    bool loginUser(const QString& email, const QString& password, QStringList& outRoles, int& outId);
-    bool registerClient(const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password);
-    bool updateClientProfile(int id_user, const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password);
-    QStringList getAllClients();
-    bool deleteClient(int id_client);
+    bool loginUser(const QString& login, const QString& password, QStringList& outRoles, int& outId);
+    bool registerClient(const QString& login, const QString& password, const QString& client_surname, const QString& name, const QString& email, const QString& phone);
+    bool updateClientProfile(int id_user, const QString& client_surname, const QString& name, const QString& email, const QString& phone, const QString& password);
+    bool deleteUser(int userId);
+    QList<Client> getAllClients();
+
 
     // блок работы с товарами и категориями
     QList<Product> getAllProducts();
+    QList<Product> getAvailableProducts();
     QList<Category> getAllCategories();
     bool addProduct(const Product& product);
     bool updateProduct(const Product& product);
-    bool deleteProduct(int id_product);
     bool addCategory(const Category& category);
     bool updateCategory(const Category& category);
-    bool deleteCategory(int id_category);
+    bool categoryExists(int id_category);
 
     // блок работы со скидками
     QList<Discount> getAllDiscounts();
     bool addDiscount(const Discount& discount);
     bool updateDiscount(const Discount& discount);
-    bool deleteDiscount(int id_discount);
 
     // блок работы с заказами
     bool createOrder(int id_client, const QList<OrderItem>& items);
@@ -60,7 +65,7 @@ public:
     bool updateOrderDeliveryDate(int id_order, const QString& date);
 
     // создание менеджера
-    bool addManager(const QString& email, const QString& password);
+    bool addManager(const QString& login, const QString& password);
 
     friend class DatabaseDestroyer;
 };

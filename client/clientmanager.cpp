@@ -6,8 +6,10 @@ ClientManager* ClientManager::getInstance() {
     return &instance;
 }
 
-ClientManager::ClientManager(QObject *parent) : QObject(parent), m_socket(new QTcpSocket(this)) {
-
+ClientManager::ClientManager(QObject *parent) : QObject(parent),
+    m_socket(new QTcpSocket(this)),
+    m_userId(-1),
+    m_userRoles("") {
     connect(m_socket, &QTcpSocket::connected, this, &ClientManager::connected);
     connect(m_socket, &QTcpSocket::disconnected, this, &ClientManager::disconnected);
     connect(m_socket, &QTcpSocket::readyRead, this, &ClientManager::onReadyRead);
@@ -53,4 +55,14 @@ void ClientManager::onReadyRead() {
     // чтение ответа от сервера и передача его в окна через сигнал
     QByteArray data = m_socket->readAll();
     emit dataReceived(QString::fromUtf8(data));
+}
+
+
+void ClientManager::setUserData(int id, const QString& roles) {
+    m_userId = id;
+    m_userRoles = roles;
+}
+
+bool ClientManager::hasRole(const QString& role) const {
+    return m_userRoles.contains(role);
 }

@@ -17,6 +17,11 @@ public:
 
     bool isConnected() const;
 
+    void setUserData(int id, const QString& roles);
+    int getUserId() const { return m_userId; }
+    QString getUserRoles() const { return m_userRoles; }
+    bool hasRole(const QString& role) const;
+
 signals:
     // сигналы для обновления интерфейса
     void connected();
@@ -32,6 +37,9 @@ private:
     ~ClientManager();
 
     QTcpSocket *m_socket;
+    int m_userId;
+    QString m_userRoles;
+
 };
 
 #endif // CLIENTMANAGER_H

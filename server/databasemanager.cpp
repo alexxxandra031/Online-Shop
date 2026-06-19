@@ -17,7 +17,7 @@ DatabaseManager::DatabaseManager() {
 
     db.setHostName("127.0.0.1");       // локальный сервер БД
     db.setPort(5432);                  // стандартный порт Postgres
-    db.setDatabaseName("onlineshop_db");     // имя бд
+    db.setDatabaseName("online_shop_db");     // имя бд
     db.setUserName("postgres");        // стандартный логин
 
 
@@ -38,21 +38,60 @@ DatabaseManager* DatabaseManager::getInstance() {
     return p_instance;
 }
 
-bool DatabaseManager::loginUser(const QString& email, const QString& password, QStringList& outRoles, int& outId) {
+
+
+QString DatabaseManager::hashPassword(const QString& password)
+{
+    return QString(
+        QCryptographicHash::hash(
+            password.toUtf8(),
+            QCryptographicHash::Sha256
+            ).toHex()
+        );
+}
+
+
+bool DatabaseManager::isPasswordValid(const QString& password)
+{
+    QRegularExpression regex(
+        "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$"
+        );
+
+    return regex.match(password).hasMatch();
+}
+
+int DatabaseManager::getClientIdByUserId(int id_user)
+{
     QSqlQuery query;
 
-    query.prepare("SELECT id_user, password_hash FROM users WHERE email = :email");
-    query.bindValue(":email", email);
+    query.prepare(
+        "SELECT id_client "
+        "FROM clients "
+        "WHERE id_user = :id_user"
+        );
+
+    query.bindValue(":id_user", id_user);
+
+    if (query.exec() && query.next())
+        return query.value(0).toInt();
+
+    return -1;
+}
+
+bool DatabaseManager::loginUser(const QString& login, const QString& password, QStringList& outRoles, int& outId) {
+    QSqlQuery query;
+    query.prepare("SELECT id_user, password_hash FROM users WHERE login = :login"); // email -> login
+    query.bindValue(":login", login);
 
     if (!query.exec() || !query.next()) return false;
 
     int id_user = query.value(0).toInt();
     QString db_hash = query.value(1).toString();
 
+    if (db_hash != hashPassword(password))
+        return false;
 
-    if (db_hash != password) return false;
     outId = id_user;
-
 
     QSqlQuery roleQuery;
     roleQuery.prepare("SELECT r.name FROM roles r "
@@ -68,15 +107,19 @@ bool DatabaseManager::loginUser(const QString& email, const QString& password, Q
     return !outRoles.isEmpty();
 }
 
-bool DatabaseManager::registerClient(const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password) {
+bool DatabaseManager::registerClient(const QString& login, const QString& password, const QString& client_surname, const QString& name, const QString& email, const QString& phone) {
+
+    if (!isPasswordValid(password))
+        return false;
+
+
     QSqlDatabase db = QSqlDatabase::database();
     db.transaction();
 
-
     QSqlQuery qUser;
-    qUser.prepare("INSERT INTO users (email, password_hash) VALUES (:email, :pass) RETURNING id_user");
-    qUser.bindValue(":email", email);
-    qUser.bindValue(":pass", password);
+    qUser.prepare("INSERT INTO users (login, password_hash) VALUES (:login, :pass) RETURNING id_user");
+    qUser.bindValue(":login", login);
+    qUser.bindValue(":pass", hashPassword(password));
 
     if (!qUser.exec() || !qUser.next()) {
         db.rollback();
@@ -92,11 +135,11 @@ bool DatabaseManager::registerClient(const QString& surname, const QString& name
         return false;
     }
 
-
     QSqlQuery qClient;
-    qClient.prepare("INSERT INTO clients (surname, name, phone, id_user) VALUES (:surname, :name, :phone, :id_user)");
-    qClient.bindValue(":surname", surname);
+    qClient.prepare("INSERT INTO clients (surname, name, email, phone, id_user) VALUES (:surname, :name, :email, :phone, :id_user)");
+    qClient.bindValue(":surname", client_surname);
     qClient.bindValue(":name", name);
+    qClient.bindValue(":email", email);
     qClient.bindValue(":phone", phone);
     qClient.bindValue(":id_user", id_user);
 
@@ -109,30 +152,36 @@ bool DatabaseManager::registerClient(const QString& surname, const QString& name
     return true;
 }
 
-bool DatabaseManager::updateClientProfile(int id_user, const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password) {
+bool DatabaseManager::updateClientProfile(int id_user, const QString& client_surname,
+                                          const QString& name, const QString& email,
+                                          const QString& phone, const QString& password) {
     QSqlDatabase db = QSqlDatabase::database();
     db.transaction();
 
 
-    QSqlQuery qUser;
-    qUser.prepare("UPDATE users SET email = :email, password_hash = :pass WHERE id_user = :id_user");
-    qUser.bindValue(":email", email);
-    qUser.bindValue(":pass", password);
-    qUser.bindValue(":id_user", id_user);
+    if (!password.isEmpty()) {
+        if (!isPasswordValid(password)) {
+            db.rollback();
+            return false;
+        }
 
-    if (!qUser.exec()) {
-        db.rollback();
-        return false;
+        QSqlQuery qUser;
+        qUser.prepare("UPDATE users SET password_hash = :pass WHERE id_user = :id_user");
+        qUser.bindValue(":pass", hashPassword(password));
+        qUser.bindValue(":id_user", id_user);
+        if (!qUser.exec()) {
+            db.rollback();
+            return false;
+        }
     }
 
-
     QSqlQuery qClient;
-    qClient.prepare("UPDATE clients SET surname = :surname, name = :name, phone = :phone WHERE id_user = :id_user");
-    qClient.bindValue(":surname", surname);
+    qClient.prepare("UPDATE clients SET surname = :surname, name = :name, email = :email, phone = :phone WHERE id_user = :id_user");
+    qClient.bindValue(":surname", client_surname);
     qClient.bindValue(":name", name);
+    qClient.bindValue(":email", email);
     qClient.bindValue(":phone", phone);
     qClient.bindValue(":id_user", id_user);
-
     if (!qClient.exec()) {
         db.rollback();
         return false;
@@ -142,31 +191,27 @@ bool DatabaseManager::updateClientProfile(int id_user, const QString& surname, c
     return true;
 }
 
-QStringList DatabaseManager::getAllClients() {
-    QStringList list;
-    QSqlQuery query("SELECT c.id_client, c.surname, c.name, u.email, c.phone, c.status "
-                    "FROM clients c "
-                    "JOIN users u ON c.id_user = u.id_user");
+QList<Client> DatabaseManager::getAllClients() {
+    QList<Client> list;
+
+    QSqlQuery query("SELECT id_client, surname, name, email, phone, status, id_user FROM clients");
+
     while (query.next()) {
-        QString row = QString("%1;%2;%3;%4;%5;%6")
-        .arg(query.value(0).toInt())       // id_client
-            .arg(query.value(1).toString())    // surname
-            .arg(query.value(2).toString())    // name
-            .arg(query.value(3).toString())    // email из таблицы users
-            .arg(query.value(4).toString())    // phone
-            .arg(query.value(5).toString());   // status
-        list.append(row);
+        Client client;
+        client.id_client      = query.value(0).toInt();
+        client.surname = query.value(1).toString();
+        client.name           = query.value(2).toString();
+        client.email          = query.value(3).toString();
+        client.phone          = query.value(4).toString();
+        client.status         = query.value(5).toString();
+        client.id_user        = query.value(6).toInt();
+
+        list.append(client);
     }
+
     return list;
 }
 
-bool DatabaseManager::deleteClient(int id_client) {
-    QSqlQuery query;
-    // удаление из users, а  ON DELETE CASCADE удалит профиль из clients и user_roles
-    query.prepare("DELETE FROM users WHERE id_user = (SELECT id_user FROM clients WHERE id_client = :id_client)");
-    query.bindValue(":id_client", id_client);
-    return query.exec();
-}
 
 QList<Product> DatabaseManager::getAllProducts() {
     QList<Product> list;
@@ -183,6 +228,49 @@ QList<Product> DatabaseManager::getAllProducts() {
     }
     return list;
 }
+
+QList<Product> DatabaseManager::getAvailableProducts()
+{
+    QList<Product> list;
+
+    QSqlQuery query(
+        "SELECT id_product, name, price, unit, stock_quantity, id_category "
+        "FROM products "
+        "WHERE stock_quantity > 0"
+        );
+
+    while (query.next()) {
+        Product p;
+
+        p.id_product = query.value(0).toInt();
+        p.name = query.value(1).toString();
+        p.price = query.value(2).toDouble();
+        p.unit = query.value(3).toString();
+        p.stock_quantity = query.value(4).toInt();
+        p.id_category = query.value(5).toInt();
+
+        list.append(p);
+    }
+
+    return list;
+}
+
+bool DatabaseManager::deleteUser(int id_user)
+{
+    QSqlQuery query;
+
+    query.prepare("DELETE FROM users WHERE id_user = :id_user");
+    query.bindValue(":id_user", id_user);
+
+    if (!query.exec()) {
+        qDebug() << "Delete user failed:" << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+
 
 QList<Category> DatabaseManager::getAllCategories() {
     QList<Category> list;
@@ -222,11 +310,22 @@ bool DatabaseManager::updateProduct(const Product& product) {
     return query.exec();
 }
 
-bool DatabaseManager::deleteProduct(int id_product) {
+bool DatabaseManager::categoryExists(int id_category)
+{
     QSqlQuery query;
-    query.prepare("DELETE FROM products WHERE id_product = :id");
-    query.bindValue(":id", id_product);
-    return query.exec();
+
+    query.prepare(
+        "SELECT 1 "
+        "FROM categories "
+        "WHERE id_category = :id"
+        );
+
+    query.bindValue(":id", id_category);
+
+    if (!query.exec())
+        return false;
+
+    return query.next();
 }
 
 bool DatabaseManager::addCategory(const Category& category) {
@@ -243,15 +342,6 @@ bool DatabaseManager::updateCategory(const Category& category) {
     query.bindValue(":id", category.id_category);
     return query.exec();
 }
-
-bool DatabaseManager::deleteCategory(int id_category) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM categories WHERE id_category = :id");
-    query.bindValue(":id", id_category);
-    return query.exec();
-}
-
-
 
 
 QList<Order> DatabaseManager::getAllOrders() {
@@ -295,7 +385,13 @@ bool DatabaseManager::createOrder(int id_client, const QList<OrderItem>& items) 
 
 
     QSqlQuery qOrder;
-    qOrder.prepare("INSERT INTO orders (id_client) VALUES (:id_client) RETURNING id_order");
+    qOrder.prepare(
+        "INSERT INTO orders "
+        "(id_client, sale_date, delivery_date) "
+        "VALUES "
+        "(:id_client, NULL, CURRENT_DATE + INTERVAL '5 days') "
+        "RETURNING id_order"
+        );
     qOrder.bindValue(":id_client", id_client);
 
     if (!qOrder.exec() || !qOrder.next()) {
@@ -374,22 +470,22 @@ bool DatabaseManager::updateDiscount(const Discount& discount) {
     return query.exec();
 }
 
-bool DatabaseManager::deleteDiscount(int id_discount) {
-    QSqlQuery query;
-    query.prepare("DELETE FROM discounts WHERE id_discount = :id");
-    query.bindValue(":id", id_discount);
-    return query.exec();
-}
 
-bool DatabaseManager::addManager(const QString& email, const QString& password) {
+bool DatabaseManager::addManager(const QString& login, const QString& password) {
+
+    if (!isPasswordValid(password))
+        return false;
+
+
     QSqlDatabase db = QSqlDatabase::database();
     db.transaction();
 
-
     QSqlQuery qUser;
-    qUser.prepare("INSERT INTO users (email, password_hash) VALUES (:email, :pass) RETURNING id_user");
-    qUser.bindValue(":email", email);
-    qUser.bindValue(":pass", password);
+    qUser.prepare("INSERT INTO users (login, password_hash) VALUES (:login, :pass) RETURNING id_user");
+    qUser.bindValue(":login", login);
+    qUser.bindValue(":pass", hashPassword(password));
+
+
 
     if (!qUser.exec() || !qUser.next()) {
         db.rollback();

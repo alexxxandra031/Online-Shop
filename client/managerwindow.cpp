@@ -4,6 +4,7 @@
 ManagerWindow::ManagerWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ManagerWindow)
+    , m_userId(-1)
 {
     ui->setupUi(this);
     connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
@@ -85,7 +86,14 @@ ManagerWindow::ManagerWindow(QWidget *parent)
     connect(ui->btnSetDelivery, &QPushButton::clicked, this, [this]() {
         // для теста берем id заказа 1 (в идеале нужно брать выделенную строку таблицы)
         QString date = ui->dateDelivery->date().toString("dd.MM.yyyy");
-        QString req = QString("UPDATE_DELIVERY|1|%1").arg(date);
+        QModelIndex index = ui->tableOrders->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите заказ");
+            return;
+        }
+        int orderId = ui->tableOrders->model()
+                          ->data(ui->tableOrders->model()->index(index.row(), 0)).toInt();
+        QString req = QString("UPDATE_DELIVERY|%1|%2").arg(orderId).arg(date);
 
         ClientManager::getInstance()->sendRequest(req);
     });
@@ -94,8 +102,10 @@ ManagerWindow::ManagerWindow(QWidget *parent)
         QString email = ui->lineEmail->text();
         QString password = ui->linePassword->text();
 
-        //ЗАГЛУШКА
-        QString req = QString("UPDATE_PROFILE|202|Сотрудник|Менеджер|%1|нет|%2").arg(email).arg(password);
+        QString req = QString("UPDATE_PROFILE|%1|%2|%3|%4|%5|%6")
+                          .arg(m_userId)
+                          .arg("Сотрудник").arg("Менеджер")
+                          .arg(email).arg("нет").arg(password);
         ClientManager::getInstance()->sendRequest(req);
     });
 }

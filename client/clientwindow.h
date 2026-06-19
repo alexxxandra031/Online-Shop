@@ -17,9 +17,12 @@ class ClientWindow : public QMainWindow
 public:
     explicit ClientWindow(QWidget *parent = nullptr);
     ~ClientWindow();
+    void setUserData(int userId) { m_userId = userId; }
+
 
 private:
     Ui::ClientWindow *ui;
+    int m_userId;
 };
 
 #endif // CLIENTWINDOW_H

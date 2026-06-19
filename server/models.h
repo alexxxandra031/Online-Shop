@@ -12,7 +12,7 @@ struct Role {
 // пользователи
 struct User {
     int id_user;
-    QString email;
+    QString login;
     QString password_hash;
 };
 
@@ -21,6 +21,7 @@ struct Client {
     int id_client;
     QString surname;
     QString name;
+    QString email;
     QString phone;
     QString status;
     int id_user;

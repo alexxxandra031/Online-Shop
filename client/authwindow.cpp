@@ -14,10 +14,15 @@ AuthWindow::AuthWindow(QWidget *parent)
         QString command = parts.value(0);
 
         if (command == "LOGIN_OK") {
+            // parts: LOGIN_OK|role1,role2|userId
+            int userId = parts.value(2).toInt();
+            QString roles = parts.value(1);
+
+            ClientManager::getInstance()->setUserData(userId, roles);
 
             MainWindow *mainWin = new MainWindow();
             mainWin->setAttribute(Qt::WA_DeleteOnClose);
-            mainWin->show();
+            mainWin->showRoleSelection(roles.split(","));
             this->hide();
         }
         else if (command == "LOGIN_FAIL") {
@@ -48,33 +53,34 @@ AuthWindow::AuthWindow(QWidget *parent)
 
     connect(ui->btnLogin, &QPushButton::clicked, this, [this]() {
 
-        QString email = ui->lineLoginEmail->text();
+        QString login = ui->lineLoginEmail->text();
         QString password = ui->lineLoginPassword->text();
 
-        if (email.isEmpty() || password.isEmpty()) {
+       if (login.isEmpty() || password.isEmpty()) {
             QMessageBox::warning(this, "ошибка", "введите логин и пароль");
             return;
         }
 
-        QString req = QString("LOGIN|%1|%2").arg(email).arg(password);
+        QString req = QString("LOGIN|%1|%2").arg(login).arg(password);
         ClientManager::getInstance()->sendRequest(req);
     });
 
     connect(ui->btnRegisterSubmit, &QPushButton::clicked, this, [this]() {
+        QString login = ui->lineRegLogin->text();
         QString surname = ui->lineRegLastName->text();
         QString name = ui->lineRegFirstName->text();
         QString phone = ui->lineRegPhone->text();
         QString email = ui->lineRegEmail->text();
         QString password = ui->lineRegPassword->text();
 
-        if (surname.isEmpty() || name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        if (login.isEmpty() || surname.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
             QMessageBox::warning(this, "ошибка", "заполните все обязательные поля");
             return;
         }
 
-        QString req = QString("REGISTER|%1|%2|%3|%4|%5").arg(surname).arg(name).arg(email).arg(phone).arg(password);
+        QString req = QString("REGISTER|%1|%2|%3|%4|%5|%6")
+                          .arg(login).arg(password).arg(surname).arg(name).arg(email).arg(phone);
         ClientManager::getInstance()->sendRequest(req);
-
     });
 }
 

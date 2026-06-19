@@ -18,9 +18,12 @@ class ManagerWindow : public QMainWindow
 public:
     explicit ManagerWindow(QWidget *parent = nullptr);
     ~ManagerWindow();
+    void setUserData(int userId) { m_userId = userId; }
+
 
 private:
     Ui::ManagerWindow *ui;
+    int m_userId;
 };
 
 

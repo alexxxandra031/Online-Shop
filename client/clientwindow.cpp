@@ -4,6 +4,7 @@
 ClientWindow::ClientWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ClientWindow)
+    , m_userId(-1)
 {
     ui->setupUi(this);
 
@@ -42,7 +43,7 @@ ClientWindow::ClientWindow(QWidget *parent)
             QStandardItemModel *model = new QStandardItemModel(this);
             model->setHorizontalHeaderLabels({"id", "дата", "сумма", "статус"});
 
-            // парсим заказы: id;дата;сумма;статус#...
+
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
                 for (int i = 0; i < rows.size(); ++i) {
@@ -63,6 +64,14 @@ ClientWindow::ClientWindow(QWidget *parent)
         else if (command == "CREATE_ORDER_FAIL") {
             QMessageBox::warning(this, "ошибка", "не удалось создать заказ");
         }
+        else if (command == "ACCESS_DENIED")
+        {
+            QMessageBox::warning(
+                this,
+                "Доступ запрещён",
+                "Недостаточно прав для выполнения операции"
+                );
+        }
     });
 
 
@@ -78,7 +87,7 @@ ClientWindow::ClientWindow(QWidget *parent)
 
     connect(ui->btnHistory, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageHistory);
-        ClientManager::getInstance()->sendRequest("GET_CLIENT_ORDERS|101");
+        ClientManager::getInstance()->sendRequest("GET_CLIENT_ORDERS");
     });
 
     connect(ui->btnProfile, &QPushButton::clicked, this, [this]() {
@@ -92,16 +101,14 @@ ClientWindow::ClientWindow(QWidget *parent)
         QString email = ui->lineEmail->text();
         QString password = ui->linePassword->text();
 
-        //ЗАГЛУШКА!!!
-        QString req = QString("UPDATE_PROFILE|101|%1|%2|%3|%4|%5")
+        QString req = QString("UPDATE_PROFILE|%1|%2|%3|%4|%5|%6")
+                          .arg(m_userId)
                           .arg(surname).arg(name).arg(email).arg(phone).arg(password);
-
         ClientManager::getInstance()->sendRequest(req);
     });
 
     connect(ui->btnSubmitOrder, &QPushButton::clicked, this, [this]() {
-        //дополнить потом
-        QString req = "CREATE_ORDER|101|1:2;3:1";
+        QString req = QString("CREATE_ORDER|%1|1:2;3:1").arg(m_userId);
 
         ClientManager::getInstance()->sendRequest(req);
     });

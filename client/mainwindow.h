@@ -18,8 +18,17 @@ public:
 
     void showRoleSelection(const QStringList &roles);
 
+    void setUserData(int id, const QStringList& roles) {
+        m_userId = id;
+        m_roles = roles;
+    }
+    int getUserId() const { return m_userId; }
+
 private:
     Ui::MainWindow *ui;
+
+    int m_userId;
+    QStringList m_roles;
 
 
 };

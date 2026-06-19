@@ -16,9 +16,11 @@ class AuthWindow : public QMainWindow
 public:
     AuthWindow(QWidget *parent = nullptr);
     ~AuthWindow();
+    void setUserData(int userId) { m_userId = userId; }
 
 private:
-    Ui::AuthWindow *ui; //
+    Ui::AuthWindow *ui;
+    int m_userId;
 };
 
 #endif // AUTHWINDOW_H
