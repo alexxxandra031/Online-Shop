@@ -40,7 +40,7 @@ private:
     void handleUpdateProfile( const QString& surname, const QString& name, const QString& email, const QString& phone, const QString& password);
     void handleGetClients();
     void handleDeleteUser(const QString& id_user_str);
-
+    void handleGetUsers();
     // товары и категории
     void handleGetProducts();
     void handleGetCategories();

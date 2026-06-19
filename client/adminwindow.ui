@@ -19,7 +19,7 @@
       </item>
       <item>
        <widget class="QPushButton" name="btnUsersCrud">
-        <property name="text"><string>Управление клиентами</string></property>
+        <property name="text"><string>Клиенты (просмотр)</string></property>
        </widget>
       </item>
       <item>
@@ -30,6 +30,12 @@
       <item>
        <widget class="QPushButton" name="btnArchive">
         <property name="text"><string>Архив и Выручка</string></property>
+       </widget>
+      </item>
+      <!-- Новая кнопка для управления пользователями -->
+      <item>
+       <widget class="QPushButton" name="btnUsersMgmt">
+        <property name="text"><string>Управление пользователями</string></property>
        </widget>
       </item>
       <item>
@@ -47,7 +53,7 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
-      <!-- Страница "Каталог и Категории" -->
+      <!-- Страница "Каталог и Категории" (без изменений) -->
       <widget class="QWidget" name="pageCatalogCrud">
        <layout class="QVBoxLayout" name="catCrudLayout">
         <item>
@@ -102,36 +108,29 @@
         </item>
        </layout>
       </widget>
-      <!-- Страница "Управление клиентами" -->
+
+      <!-- Страница "Клиенты" – ТОЛЬКО ПРОСМОТР, кнопки управления удалены -->
       <widget class="QWidget" name="pageUsersCrud">
        <layout class="QVBoxLayout" name="userCrudLayout">
         <item>
          <widget class="QLabel" name="lblInfoUsers">
           <property name="text">
-           <string>Для обновления списка клиентов нажмите кнопку «Управление клиентами» слева.</string>
+           <string>Для обновления списка клиентов нажмите кнопку «Клиенты (просмотр)» слева.</string>
           </property>
           <property name="wordWrap"><bool>true</bool></property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lblU1"><property name="text"><string>Управление учетными записями клиентов:</string></property></widget>
+         <widget class="QLabel" name="lblU1"><property name="text"><string>Список зарегистрированных клиентов (только просмотр):</string></property></widget>
         </item>
         <item>
          <widget class="QTableView" name="tableUsersCrud"/>
         </item>
-        <item>
-         <layout class="QHBoxLayout" name="crudBtnLayout2">
-          <item>
-           <widget class="QPushButton" name="btnAddEmployee"><property name="text"><string>Добавить менеджера</string></property></widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnDelUser"><property name="text"><string>Удалить пользователя</string></property></widget>
-          </item>
-         </layout>
-        </item>
+        <!-- Нет кнопок добавления/удаления -->
        </layout>
       </widget>
-      <!-- Страница "Система скидок" -->
+
+      <!-- Страница "Система скидок" (без изменений) -->
       <widget class="QWidget" name="pageDiscountsCrud">
        <layout class="QVBoxLayout" name="discLayout">
         <item>
@@ -157,7 +156,8 @@
         </item>
        </layout>
       </widget>
-      <!-- Страница "Архив и Выручка" -->
+
+      <!-- Страница "Архив и Выручка" (без изменений) -->
       <widget class="QWidget" name="pageArchive">
        <layout class="QVBoxLayout" name="archiveLayout">
         <item>
@@ -176,7 +176,42 @@
         </item>
        </layout>
       </widget>
-      <!-- Страница "Мой профиль" (упрощённая) -->
+
+      <!-- НОВАЯ СТРАНИЦА: Управление пользователями (все учётные записи) -->
+      <widget class="QWidget" name="pageUsers">
+       <layout class="QVBoxLayout" name="usersLayout">
+        <item>
+         <widget class="QLabel" name="lblInfoUsersMgmt">
+          <property name="text">
+           <string>Список всех пользователей системы (логин и роли). Удаление учётной записи не удаляет данные клиента.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblUsersMgmt"><property name="text"><string>Учётные записи:</string></property></widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableUsers"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="usersBtnLayout">
+          <item>
+           <widget class="QPushButton" name="btnAddManager">
+            <property name="text"><string>Добавить менеджера</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteSelectedUser">
+            <property name="text"><string>Удалить выбранного пользователя</string></property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- Страница "Мой профиль" (без изменений) -->
       <widget class="QWidget" name="pageProfile">
        <layout class="QVBoxLayout" name="profLayout">
         <item>

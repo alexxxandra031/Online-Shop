@@ -40,6 +40,7 @@ public:
     bool updateClientProfile(int id_user, const QString& client_surname, const QString& name, const QString& email, const QString& phone, const QString& password);
     bool deleteUser(int userId);
     QList<Client> getAllClients();
+    QStringList getAllUsersData();
 
 
     // блок работы с товарами и категориями

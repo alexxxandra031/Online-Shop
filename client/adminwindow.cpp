@@ -67,6 +67,24 @@ AdminWindow::AdminWindow(QWidget *parent)
             ui->tableArchive->setModel(model);
             ui->tableArchive->horizontalHeader()->setStretchLastSection(true);
         }
+        else if (command == "USERS_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "Логин", "Роли"});
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
+                    QStringList cols = r.split(";");
+                    if (cols.size() >= 3) {
+                        QList<QStandardItem*> items;
+                        items.append(new QStandardItem(cols[0])); // id
+                        items.append(new QStandardItem(cols[1])); // login
+                        items.append(new QStandardItem(cols[2])); // roles
+                        model->appendRow(items);
+                    }
+                }
+            }
+            ui->tableUsers->setModel(model);
+            ui->tableUsers->horizontalHeader()->setStretchLastSection(true);
+        }
         else if (command == "CATEGORIES_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
             model->setHorizontalHeaderLabels({"id", "название"});
@@ -81,6 +99,7 @@ AdminWindow::AdminWindow(QWidget *parent)
                     }
                 }
             }
+
             ui->tableCategories->setModel(model);
             ui->tableCategories->horizontalHeader()->setStretchLastSection(true);
         }
@@ -130,30 +149,9 @@ AdminWindow::AdminWindow(QWidget *parent)
             );
     });
 
-    connect(ui->btnAddEmployee, &QPushButton::clicked, this, [this]() {
-        QString email = QInputDialog::getText(this, "Добавить менеджера", "Email:");
-        if (email.isEmpty()) return;
-        QString password = QInputDialog::getText(this, "Добавить менеджера", "Пароль:", QLineEdit::Password);
-        if (password.isEmpty()) return;
 
-        ClientManager::getInstance()->sendRequest(
-            QString("ADD_MANAGER|%1|%2").arg(email).arg(password)
-            );
-    });
 
-    connect(ui->btnDelUser, &QPushButton::clicked, this, [this]() {
-        QModelIndex index = ui->tableUsersCrud->currentIndex();
-        if (!index.isValid()) {
-            QMessageBox::warning(this, "Ошибка", "Выберите пользователя");
-            return;
-        }
-        int userId = ui->tableUsersCrud->model()
-                         ->data(ui->tableUsersCrud->model()->index(index.row(), 0)).toInt();
 
-        ClientManager::getInstance()->sendRequest(
-            QString("DELETE_USER|%1").arg(userId)
-            );
-    });
 
     connect(ui->btnAddDiscount, &QPushButton::clicked, this, [this]() {
         QString type = QInputDialog::getText(this, "Добавить скидку", "Тип:");
@@ -166,7 +164,7 @@ AdminWindow::AdminWindow(QWidget *parent)
             );
     });
 
-    // НОВЫЙ ОБРАБОТЧИК СМЕНЫ ПАРОЛЯ
+
     connect(ui->btnChangePassword, &QPushButton::clicked, this, [this]() {
         QString newPassword = ui->lineNewPassword->text();
         if (newPassword.isEmpty()) {
@@ -246,6 +244,33 @@ AdminWindow::AdminWindow(QWidget *parent)
         if (newName.isEmpty()) return;
         ClientManager::getInstance()->sendRequest(
             QString("UPDATE_CATEGORY|%1|%2").arg(catId).arg(newName)
+            );
+    });
+
+    connect(ui->btnUsersMgmt, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentWidget(ui->pageUsers);
+        ClientManager::getInstance()->sendRequest("GET_USERS");
+    });
+
+    connect(ui->btnDeleteSelectedUser, &QPushButton::clicked, this, [this]() {
+        QModelIndex index = ui->tableUsers->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите пользователя для удаления");
+            return;
+        }
+        int userId = ui->tableUsers->model()
+                         ->data(ui->tableUsers->model()->index(index.row(), 0)).toInt();
+        // Отправляем команду удаления (существующий обработчик DELETE_USER на сервере)
+        ClientManager::getInstance()->sendRequest(QString("DELETE_USER|%1").arg(userId));
+    });
+
+    connect(ui->btnAddManager, &QPushButton::clicked, this, [this]() {
+        QString email = QInputDialog::getText(this, "Добавить менеджера", "Email:");
+        if (email.isEmpty()) return;
+        QString password = QInputDialog::getText(this, "Добавить менеджера", "Пароль:", QLineEdit::Password);
+        if (password.isEmpty()) return;
+        ClientManager::getInstance()->sendRequest(
+            QString("ADD_MANAGER|%1|%2").arg(email).arg(password)
             );
     });
 }

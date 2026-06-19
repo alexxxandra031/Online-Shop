@@ -671,3 +671,23 @@ QList<OrderDiscount> DatabaseManager::getOrderDiscounts(int id_order) {
     }
     return list;
 }
+
+QStringList DatabaseManager::getAllUsersData() {
+    QStringList rows;
+    QSqlQuery query(
+        "SELECT u.id_user, u.login, "
+        "COALESCE(string_agg(r.name, ','), '') AS roles "
+        "FROM users u "
+        "LEFT JOIN user_roles ur ON u.id_user = ur.id_user "
+        "LEFT JOIN roles r ON ur.id_role = r.id_role "
+        "GROUP BY u.id_user, u.login"
+        );
+    while (query.next()) {
+        QString row = QString("%1;%2;%3")
+        .arg(query.value(0).toInt())      // id_user
+            .arg(query.value(1).toString())   // login
+            .arg(query.value(2).toString());  // roles (через запятую)
+        rows << row;
+    }
+    return rows;
+}

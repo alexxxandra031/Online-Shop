@@ -35,6 +35,9 @@ void ClientHandler::parseRequest(const QString& request) {
         if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
         handleDeleteUser(parts[1]);
     }
+    else if (command == "GET_USERS") {
+        handleGetUsers();
+    }
     // товары и категории
     else if (command == "GET_PRODUCTS") {
         handleGetProducts();
@@ -752,4 +755,17 @@ void ClientHandler::handleUpdateCartQuantity(const QString& order_id, const QStr
         sendToClient("UPDATE_CART_QUANTITY_OK");
     else
         sendToClient("UPDATE_CART_QUANTITY_FAIL|Ошибка обновления");
+}
+
+
+
+void ClientHandler::handleGetUsers() {
+    if (!checkAuthorized()) return;
+    if (!isAdmin()) {
+        sendToClient("ACCESS_DENIED");
+        return;
+    }
+
+    QStringList rows = DatabaseManager::getInstance()->getAllUsersData();
+    sendToClient("USERS_DATA|" + rows.join("#"));
 }
