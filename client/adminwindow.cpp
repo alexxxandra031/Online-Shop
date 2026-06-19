@@ -12,10 +12,10 @@ AdminWindow::AdminWindow(QWidget *parent)
     connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
         QStringList parts = data.split("|");
         QString command = parts.value(0);
-
+        qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "название", "цена", "остаток"});
+            model->setHorizontalHeaderLabels({"id", "название", "цена", "ед.", "остаток", "категория"});
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
                     QList<QStandardItem*> items;
@@ -26,9 +26,9 @@ AdminWindow::AdminWindow(QWidget *parent)
             ui->tableCatalogCrud->setModel(model);
             ui->tableCatalogCrud->horizontalHeader()->setStretchLastSection(true);
         }
-        else if (command == "CLIENTS_DATA") {
+        else if (command == "ALL_CLIENTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "фамилия", "имя", "email", "телефон"});
+            model->setHorizontalHeaderLabels({"id", "фамилия", "имя", "email", "телефон", "статус"});
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
                     QList<QStandardItem*> items;
@@ -64,23 +64,6 @@ AdminWindow::AdminWindow(QWidget *parent)
             }
             ui->tableArchive->setModel(model);
             ui->tableArchive->horizontalHeader()->setStretchLastSection(true);
-        }
-        else if (command == "CATEGORIES_DATA") {
-            QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "название"});
-            if (parts.size() > 1 && !parts[1].isEmpty()) {
-                for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
-                    QStringList cols = r.split(";");
-                    if (cols.size() >= 2) {
-                        QList<QStandardItem*> items;
-                        items.append(new QStandardItem(cols[0]));
-                        items.append(new QStandardItem(cols[1]));
-                        model->appendRow(items);
-                    }
-                }
-            }
-            ui->tableCategories->setModel(model);
-            ui->tableCategories->horizontalHeader()->setStretchLastSection(true);
         }
         else if (command == "CATEGORIES_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);

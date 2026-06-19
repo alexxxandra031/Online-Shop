@@ -5,14 +5,15 @@
 #include "adminwindow.h"
 #include "clientmanager.h"
 
-
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_userId(-1)
 {
     ui->setupUi(this);
-
+    // По умолчанию все кнопки скрыты, пока не установлены роли
+    ui->btnRoleClient->setVisible(false);
+    ui->btnRoleManager->setVisible(false);
+    ui->btnRoleAdmin->setVisible(false);
 
     connect(ui->btnRoleClient, &QPushButton::clicked, this, [this]() {
         ClientWindow *clientWin = new ClientWindow();
@@ -43,11 +44,15 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-
-void MainWindow::showRoleSelection(const QStringList &roles) {
-    this->show();
+void MainWindow::setRoles(const QStringList &roles) {
+    m_roles = roles;
+    ui->btnRoleClient->setVisible(roles.contains("Клиент"));
+    ui->btnRoleManager->setVisible(roles.contains("Менеджер"));
+    ui->btnRoleAdmin->setVisible(roles.contains("Администратор"));
 }
 
-
-
+void MainWindow::showRoleSelection(const QStringList &roles) {
+    setRoles(roles);
+    this->show();
+}
 

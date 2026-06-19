@@ -30,23 +30,32 @@ void TcpServer::slotNewConnection() {
     qDebug() << "новый клиент подключился:" << socket->socketDescriptor();
 }
 
+
+
 void TcpServer::slotServerRead() {
     QTcpSocket* socket = (QTcpSocket*)sender();
     QByteArray array = socket->readAll();
-    QString request = QString::fromUtf8(array).trimmed();
+    QString data = QString::fromUtf8(array).trimmed();
 
-    ClientHandler* client = nullptr;
-    for (int i = 0; i < m_clients.size(); ++i) {
-        if (m_clients[i]->getSocket() == socket) {
-            client = m_clients[i];
-            break;
+    // Разбиваем по символу \n (если несколько команд в одном пакете)
+    QStringList requests = data.split("\n", Qt::SkipEmptyParts);
+    for (const QString &request : requests) {
+        QString trimmedRequest = request.trimmed();
+        if (trimmedRequest.isEmpty()) continue;
+
+        ClientHandler* client = nullptr;
+        for (int i = 0; i < m_clients.size(); ++i) {
+            if (m_clients[i]->getSocket() == socket) {
+                client = m_clients[i];
+                break;
+            }
+        }
+        if (client) {
+            client->parseRequest(trimmedRequest);
         }
     }
-
-    if(client) {
-        client->parseRequest(request);
-    }
 }
+
 
 void TcpServer::slotClientDisconnected() {
     QTcpSocket* socket = (QTcpSocket*)sender();

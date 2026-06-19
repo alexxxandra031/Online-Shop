@@ -17,7 +17,7 @@ public:
     ~MainWindow();
 
     void showRoleSelection(const QStringList &roles);
-
+    void setRoles(const QStringList &roles);
     void setUserData(int id, const QStringList& roles) {
         m_userId = id;
         m_roles = roles;

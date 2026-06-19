@@ -11,7 +11,7 @@ ClientWindow::ClientWindow(QWidget *parent)
     connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
         QStringList parts = data.split("|");
         QString command = parts.value(0);
-
+        qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
 
             QStandardItemModel *model = new QStandardItemModel(this);

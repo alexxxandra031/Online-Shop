@@ -42,7 +42,7 @@ void ClientManager::disconnectFromServer() {
 void ClientManager::sendRequest(const QString &request) {
     // отправка текста на сервер
     if (m_socket->state() == QAbstractSocket::ConnectedState) {
-        m_socket->write(request.toUtf8());
+        m_socket->write((request + "\n").toUtf8());
         m_socket->flush();
     }
 }

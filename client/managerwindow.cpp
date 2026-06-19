@@ -10,7 +10,7 @@ ManagerWindow::ManagerWindow(QWidget *parent)
     connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
         QStringList parts = data.split("|");
         QString command = parts.value(0);
-
+        qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
             model->setHorizontalHeaderLabels({"id", "название", "цена", "остаток"});
@@ -41,9 +41,9 @@ ManagerWindow::ManagerWindow(QWidget *parent)
             ui->tableOrders->setModel(model);
             ui->tableOrders->horizontalHeader()->setStretchLastSection(true);
         }
-        else if (command == "CLIENTS_DATA") {
+        else if (command == "ALL_CLIENTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "фамилия", "имя", "email", "телефон"});
+            model->setHorizontalHeaderLabels({"id", "фамилия", "имя", "email", "телефон", "статус"});
 
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);

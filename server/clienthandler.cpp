@@ -101,7 +101,7 @@ void ClientHandler::parseRequest(const QString& request) {
 
 void ClientHandler::sendToClient(const QString& message) {
     if (m_socket && m_socket->isOpen()) {
-        m_socket->write(message.toUtf8());
+        m_socket->write((message + "\n").toUtf8());
         m_socket->flush();
     }
 }
@@ -208,7 +208,7 @@ void ClientHandler::handleDeleteUser(const QString& id_user_str)
 {
     if (!checkAuthorized())
         return;
-    if (!isAdmin()) {
+    if (!isAdmin() && !isManager()) {
         sendToClient("ACCESS_DENIED");
         return;
     }
