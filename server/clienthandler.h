@@ -65,6 +65,11 @@ private:
     // доп. персонал
     void handleAddManager(const QString& email, const QString& password);
 
+    //корзина
+    void handleCreateCart();
+    void handleAddToCart(const QString& order_id, const QString& product_id, const QString& quantity);
+    void handleGetCart(const QString& order_id);
+    void handleCheckout(const QString& order_id);
     QTcpSocket* m_socket;
     int m_userId = -1;
     QString m_role;

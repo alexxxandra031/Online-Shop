@@ -23,6 +23,9 @@ public:
 private:
     Ui::ClientWindow *ui;
     int m_userId;
+    int m_currentCartId;
+    bool m_isCheckoutInProgress;
+    void updateCartDisplay();
 };
 
 #endif // CLIENTWINDOW_H

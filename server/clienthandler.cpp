@@ -94,6 +94,21 @@ void ClientHandler::parseRequest(const QString& request) {
         if (parts.size() != 3) { sendToClient("ERROR|INVALID_FORMAT"); return; }
         handleAddManager(parts[1], parts[2]);
     }
+    else if (command == "CREATE_CART") {
+        handleCreateCart();
+    }
+    else if (command == "ADD_TO_CART") {
+        if (parts.size() != 4) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleAddToCart(parts[1], parts[2], parts[3]);
+    }
+    else if (command == "GET_CART") {
+        if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleGetCart(parts[1]);
+    }
+    else if (command == "CHECKOUT") {
+        if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleCheckout(parts[1]);
+    }
     else {
         sendToClient("ERROR|UNKNOWN_COMMAND");
     }
@@ -115,6 +130,13 @@ bool ClientHandler::checkAuthorized() {
 }
 
 void ClientHandler::handleLogout() {
+
+    if (m_userId != -1) {
+        int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+        if (id_client > 0) {
+            DatabaseManager::getInstance()->cleanupAbandonedCart(id_client);
+        }
+    }
     m_userId = -1;
     m_role.clear();
     sendToClient("LOGOUT_OK");
@@ -128,6 +150,11 @@ void ClientHandler::handleLogin(const QString& login, const QString& password) {
     if (DatabaseManager::getInstance()->loginUser(login, password, roles, id)) {
         m_userId = id;
         m_role = roles.join(",");
+
+        int id_client = DatabaseManager::getInstance()->getClientIdByUserId(id);
+        if (id_client > 0) {
+            DatabaseManager::getInstance()->cleanupAbandonedCart(id_client);
+        }
         sendToClient(QString("LOGIN_OK|%1|%2").arg(m_role).arg(id));
     } else {
         sendToClient("LOGIN_FAIL|неверный логин или пароль");
@@ -208,7 +235,7 @@ void ClientHandler::handleDeleteUser(const QString& id_user_str)
 {
     if (!checkAuthorized())
         return;
-    if (!isAdmin() && !isManager()) {
+    if (!isAdmin()) {
         sendToClient("ACCESS_DENIED");
         return;
     }
@@ -550,4 +577,113 @@ void ClientHandler::handleAddManager(const QString& email,
         sendToClient("ADD_MANAGER_OK");
     else
         sendToClient("ADD_MANAGER_FAIL|ошибка добавления");
+}
+
+
+void ClientHandler::handleCreateCart() {
+    if (!checkAuthorized()) return;
+    if (!isClient()) {
+        sendToClient("ACCESS_DENIED");
+        return;
+    }
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("CREATE_CART_FAIL|Клиент не найден");
+        return;
+    }
+    int cartId = DatabaseManager::getInstance()->createCart(id_client);
+    if (cartId > 0)
+        sendToClient(QString("CREATE_CART_OK|%1").arg(cartId));
+    else
+        sendToClient("CREATE_CART_FAIL|Ошибка создания корзины");
+}
+
+void ClientHandler::handleAddToCart(const QString& order_id, const QString& product_id, const QString& quantity) {
+    if (!checkAuthorized()) return;
+    if (!isClient()) {
+        sendToClient("ACCESS_DENIED");
+        return;
+    }
+    int oid = order_id.toInt();
+    int pid = product_id.toInt();
+    int qty = quantity.toInt();
+    if (qty <= 0) {
+        sendToClient("ADD_TO_CART_FAIL|Количество должно быть > 0");
+        return;
+    }
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("ADD_TO_CART_FAIL|Клиент не найден");
+        return;
+    }
+    if (!DatabaseManager::getInstance()->isOrderOwnedByClientAndCart(oid, id_client)) {
+        sendToClient("ADD_TO_CART_FAIL|Заказ не является вашей корзиной");
+        return;
+    }
+    if (DatabaseManager::getInstance()->addToCart(oid, pid, qty))
+        sendToClient("ADD_TO_CART_OK");
+    else
+        sendToClient("ADD_TO_CART_FAIL|Ошибка добавления");
+}
+
+void ClientHandler::handleGetCart(const QString& order_id) {
+    if (!checkAuthorized()) return;
+    if (!isClient()) {
+        sendToClient("ACCESS_DENIED");
+        return;
+    }
+    int oid = order_id.toInt();
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("GET_CART_FAIL|Клиент не найден");
+        return;
+    }
+    if (!DatabaseManager::getInstance()->isOrderOwnedByClientAndCart(oid, id_client)) {
+        sendToClient("GET_CART_FAIL|Заказ не является вашей корзиной");
+        return;
+    }
+    QList<OrderItem> items = DatabaseManager::getInstance()->getCartItems(oid);
+    double total = DatabaseManager::getInstance()->getOrderTotal(oid);
+    QStringList rows;
+    for (const auto& item : items) {
+        QString name = DatabaseManager::getInstance()->getProductName(item.id_product);
+        double price = DatabaseManager::getInstance()->getProductPrice(item.id_product);
+        rows << QString("%1;%2;%3;%4").arg(item.id_product).arg(name).arg(item.quantity).arg(price);
+    }
+    sendToClient(QString("CART_DATA|%1|%2").arg(rows.join("#")).arg(total));
+}
+
+void ClientHandler::handleCheckout(const QString& order_id) {
+    if (!checkAuthorized()) return;
+    if (!isClient()) {
+        sendToClient("ACCESS_DENIED");
+        return;
+    }
+    int oid = order_id.toInt();
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("CHECKOUT_FAIL|Клиент не найден");
+        return;
+    }
+    if (!DatabaseManager::getInstance()->isOrderOwnedByClientAndCart(oid, id_client)) {
+        sendToClient("CHECKOUT_FAIL|Заказ не является вашей корзиной");
+        return;
+    }
+    QList<OrderItem> items = DatabaseManager::getInstance()->getCartItems(oid);
+    if (items.isEmpty()) {
+        sendToClient("CHECKOUT_FAIL|Корзина пуста");
+        return;
+    }
+    for (const auto& item : items) {
+        int stock = DatabaseManager::getInstance()->getProductStock(item.id_product);
+        if (stock < item.quantity) {
+            sendToClient(QString("CHECKOUT_FAIL|Недостаточно товара ID %1 (остаток: %2)").arg(item.id_product).arg(stock));
+            return;
+        }
+    }
+    if (DatabaseManager::getInstance()->checkout(oid)) {
+        sendToClient("CHECKOUT_OK");
+    } else {
+        sendToClient("CHECKOUT_FAIL|Ошибка оформления");
+    }
 }

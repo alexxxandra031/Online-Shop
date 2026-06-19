@@ -499,4 +499,114 @@ bool DatabaseManager::addManager(const QString& login, const QString& password) 
     return true;
 }
 
+int DatabaseManager::createCart(int id_client) {
+    // Удаляем старую корзину, если она есть
+    QSqlQuery del;
+    del.prepare("DELETE FROM orders WHERE id_client = :id AND sale_date IS NULL");
+    del.bindValue(":id", id_client);
+    del.exec();
 
+    QSqlQuery q;
+    q.prepare("INSERT INTO orders (id_client, sale_date) VALUES (:id, NULL) RETURNING id_order");
+    q.bindValue(":id", id_client);
+    if (q.exec() && q.next()) {
+        return q.value(0).toInt();
+    }
+    return -1;
+}
+
+bool DatabaseManager::addToCart(int id_order, int id_product, int quantity) {
+    QSqlQuery q;
+    q.prepare(
+        "INSERT INTO order_items (id_order, id_product, quantity) "
+        "VALUES (:order, :product, :qty) "
+        "ON CONFLICT (id_order, id_product) DO UPDATE SET quantity = order_items.quantity + EXCLUDED.quantity"
+        );
+    q.bindValue(":order", id_order);
+    q.bindValue(":product", id_product);
+    q.bindValue(":qty", quantity);
+    return q.exec();
+}
+
+QList<OrderItem> DatabaseManager::getCartItems(int id_order) {
+    QList<OrderItem> list;
+    QSqlQuery q;
+    q.prepare("SELECT id_product, quantity FROM order_items WHERE id_order = :order");
+    q.bindValue(":order", id_order);
+    if (q.exec()) {
+        while (q.next()) {
+            OrderItem item;
+            item.id_order = id_order;
+            item.id_product = q.value(0).toInt();
+            item.quantity = q.value(1).toInt();
+            list.append(item);
+        }
+    }
+    return list;
+}
+
+bool DatabaseManager::checkout(int id_order) {
+    QSqlQuery q;
+    q.prepare("UPDATE orders SET sale_date = CURRENT_TIMESTAMP WHERE id_order = :id");
+    q.bindValue(":id", id_order);
+    if (!q.exec()) {
+        qDebug() << "checkout SQL error:" << q.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool DatabaseManager::isOrderOwnedByClientAndCart(int id_order, int id_client) {
+    QSqlQuery q;
+    q.prepare("SELECT id_order FROM orders WHERE id_order = :id AND id_client = :client AND sale_date IS NULL");
+    q.bindValue(":id", id_order);
+    q.bindValue(":client", id_client);
+    return (q.exec() && q.next());
+}
+
+double DatabaseManager::getOrderTotal(int id_order) {
+    QSqlQuery q;
+    q.prepare("SELECT total_sum FROM orders WHERE id_order = :id");
+    q.bindValue(":id", id_order);
+    if (q.exec() && q.next()) {
+        return q.value(0).toDouble();
+    }
+    return 0.0;
+}
+
+QString DatabaseManager::getProductName(int id_product) {
+    QSqlQuery q;
+    q.prepare("SELECT name FROM products WHERE id_product = :id");
+    q.bindValue(":id", id_product);
+    if (q.exec() && q.next()) {
+        return q.value(0).toString();
+    }
+    return "";
+}
+
+double DatabaseManager::getProductPrice(int id_product) {
+    QSqlQuery q;
+    q.prepare("SELECT price FROM products WHERE id_product = :id");
+    q.bindValue(":id", id_product);
+    if (q.exec() && q.next()) {
+        return q.value(0).toDouble();
+    }
+    return 0.0;
+}
+
+void DatabaseManager::cleanupAbandonedCart(int id_client) {
+    QSqlQuery q;
+    q.prepare("DELETE FROM orders WHERE id_client = :id AND sale_date IS NULL");
+    q.bindValue(":id", id_client);
+    q.exec();
+}
+
+int DatabaseManager::getProductStock(int id_product) {
+    QSqlQuery q;
+    q.prepare("SELECT stock_quantity FROM products WHERE id_product = :id");
+    q.bindValue(":id", id_product);
+    if (q.exec() && q.next()) {
+        return q.value(0).toInt();
+    }
+    return 0;
+}

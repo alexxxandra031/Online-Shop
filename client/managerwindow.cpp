@@ -13,7 +13,7 @@ ManagerWindow::ManagerWindow(QWidget *parent)
         qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "название", "цена", "остаток"});
+            model->setHorizontalHeaderLabels({"id", "название", "цена", "ед.", "остаток", "категория"});
 
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);

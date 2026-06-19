@@ -5,6 +5,8 @@ ClientWindow::ClientWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ClientWindow)
     , m_userId(-1)
+    , m_currentCartId(-1)
+    , m_isCheckoutInProgress(false)
 {
     ui->setupUi(this);
 
@@ -15,7 +17,7 @@ ClientWindow::ClientWindow(QWidget *parent)
         if (command == "PRODUCTS_DATA") {
 
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "название", "цена", "остаток"});
+            model->setHorizontalHeaderLabels({"id", "название", "цена", "ед.", "остаток", "категория"});
 
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
@@ -64,6 +66,73 @@ ClientWindow::ClientWindow(QWidget *parent)
         else if (command == "CREATE_ORDER_FAIL") {
             QMessageBox::warning(this, "ошибка", "не удалось создать заказ");
         }
+
+        else if (command == "CREATE_CART_OK") {
+            int cartId = parts.value(1).toInt();
+            m_currentCartId = cartId;
+            updateCartDisplay();
+            ui->stackedWidget->setCurrentWidget(ui->pageNewOrder);
+            QMessageBox::information(this, "Корзина создана", "Новая корзина готова к добавлению товаров.");
+        }
+        else if (command == "CREATE_CART_FAIL") {
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
+        }
+        else if (command == "ADD_TO_CART_OK") {
+            QMessageBox::information(this, "Успех", "Товар добавлен в корзину");
+            updateCartDisplay();
+        }
+        else if (command == "ADD_TO_CART_FAIL") {
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
+        }
+        else if (command == "CART_DATA") {
+            QString itemsStr = parts.value(1);
+            double total = parts.value(2).toDouble();
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"ID", "Название", "Кол-во", "Цена за ед.", "Сумма"});
+            if (!itemsStr.isEmpty()) {
+                for (const QString &row : itemsStr.split("#", Qt::SkipEmptyParts)) {
+                    QStringList cols = row.split(";");
+                    if (cols.size() >= 4) {
+                        int qty = cols[2].toInt();
+                        double price = cols[3].toDouble();
+                        double sum = qty * price;
+                        QList<QStandardItem*> items;
+                        items.append(new QStandardItem(cols[0]));
+                        items.append(new QStandardItem(cols[1]));
+                        items.append(new QStandardItem(cols[2]));
+                        items.append(new QStandardItem(cols[3]));
+                        items.append(new QStandardItem(QString::number(sum, 'f', 2)));
+                        model->appendRow(items);
+                    }
+                }
+            }
+            ui->tableCart->setModel(model);
+            ui->tableCart->horizontalHeader()->setStretchLastSection(true);
+            this->setWindowTitle(QString("Кабинет Покупателя (Итого: %1 руб.)").arg(total));
+        }
+        else if (command == "CHECKOUT_OK") {
+            m_isCheckoutInProgress = false;
+            ui->btnSubmitOrder->setEnabled(true);
+            QMessageBox::information(this, "Успех", "Заказ оформлен");
+            m_currentCartId = -1;
+            ui->tableCart->setModel(nullptr);
+            ui->stackedWidget->setCurrentWidget(ui->pageHistory);
+            ClientManager::getInstance()->sendRequest("GET_CLIENT_ORDERS");
+            ClientManager::getInstance()->sendRequest("CREATE_CART"); // создаём новую корзину
+        }
+        else if (command == "CHECKOUT_FAIL") {
+            m_isCheckoutInProgress = false;
+            ui->btnSubmitOrder->setEnabled(true);
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
+        }
+        else if (command == "GET_CART_FAIL") {
+            if (parts.value(1).contains("не является вашей корзиной")) {
+                m_currentCartId = -1;
+                ui->tableCart->setModel(nullptr);
+            } else {
+                QMessageBox::warning(this, "Ошибка", parts.value(1));
+            }
+        }
         else if (command == "ACCESS_DENIED")
         {
             QMessageBox::warning(
@@ -82,7 +151,12 @@ ClientWindow::ClientWindow(QWidget *parent)
     });
 
     connect(ui->btnNewOrder, &QPushButton::clicked, this, [this]() {
-        ui->stackedWidget->setCurrentWidget(ui->pageNewOrder);
+        if (m_currentCartId == -1) {
+            ClientManager::getInstance()->sendRequest("CREATE_CART");
+        } else {
+            ui->stackedWidget->setCurrentWidget(ui->pageNewOrder);
+            updateCartDisplay();
+        }
     });
 
     connect(ui->btnHistory, &QPushButton::clicked, this, [this]() {
@@ -108,13 +182,41 @@ ClientWindow::ClientWindow(QWidget *parent)
     });
 
     connect(ui->btnSubmitOrder, &QPushButton::clicked, this, [this]() {
-        QString req = QString("CREATE_ORDER|%1|1:2;3:1").arg(m_userId);
+        if (m_currentCartId == -1) {
+            QMessageBox::warning(this, "Ошибка", "Нет активной корзины");
+            return;
+        }
+        if (m_isCheckoutInProgress) return;
+        m_isCheckoutInProgress = true;
+        ui->btnSubmitOrder->setEnabled(false);
+        ClientManager::getInstance()->sendRequest(QString("CHECKOUT|%1").arg(m_currentCartId));
+    });
 
-        ClientManager::getInstance()->sendRequest(req);
+    connect(ui->btnAddToBasket, &QPushButton::clicked, this, [this]() {
+        if (m_currentCartId == -1) {
+            QMessageBox::warning(this, "Ошибка", "Сначала создайте корзину (нажмите «Оформить заказ» для создания)");
+            return;
+        }
+        int productId = ui->lineProductId->text().toInt();
+        int quantity = ui->spinQuantity->value();
+        if (productId <= 0 || quantity <= 0) {
+            QMessageBox::warning(this, "Ошибка", "Введите корректный ID товара и количество");
+            return;
+        }
+        ClientManager::getInstance()->sendRequest(
+            QString("ADD_TO_CART|%1|%2|%3").arg(m_currentCartId).arg(productId).arg(quantity)
+            );
     });
 }
 
 ClientWindow::~ClientWindow()
 {
     delete ui;
+}
+
+
+void ClientWindow::updateCartDisplay() {
+    if (m_currentCartId != -1) {
+        ClientManager::getInstance()->sendRequest(QString("GET_CART|%1").arg(m_currentCartId));
+    }
 }

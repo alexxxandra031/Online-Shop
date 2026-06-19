@@ -66,6 +66,18 @@ public:
     // создание менеджера
     bool addManager(const QString& login, const QString& password);
 
+    // корзина
+    int createCart(int id_client);
+    bool addToCart(int id_order, int id_product, int quantity);
+    QList<OrderItem> getCartItems(int id_order);
+    bool checkout(int id_order);
+    bool isOrderOwnedByClientAndCart(int id_order, int id_client);
+    double getOrderTotal(int id_order);
+    QString getProductName(int id_product);
+    double getProductPrice(int id_product);
+    void cleanupAbandonedCart(int id_client);
+    int getProductStock(int id_product);
+
     friend class DatabaseDestroyer;
 };
 
