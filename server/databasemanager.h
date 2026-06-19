@@ -59,7 +59,6 @@ public:
     bool updateDiscount(const Discount& discount);
 
     // блок работы с заказами
-    bool createOrder(int id_client, const QList<OrderItem>& items);
     QList<Order> getAllOrders();
     QList<Order> getClientOrders(int id_client);
     bool updateOrderDeliveryDate(int id_order, const QString& date);

@@ -46,18 +46,18 @@ ClientWindow::ClientWindow(QWidget *parent)
 
         else if (command == "CLIENT_ORDERS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "дата", "сумма", "статус"});
-
-
+            model->setHorizontalHeaderLabels({"id", "дата", "доставка", "сумма"});
             if (parts.size() > 1 && !parts[1].isEmpty()) {
-                QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
-                for (int i = 0; i < rows.size(); ++i) {
-                    QStringList cols = rows[i].split(";");
-                    QList<QStandardItem*> items;
-                    for (const QString &c : cols) {
-                        items.append(new QStandardItem(c));
+                for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
+                    QStringList cols = r.split(";");
+                    if (cols.size() >= 4) {
+                        QList<QStandardItem*> items;
+                        items.append(new QStandardItem(cols[0])); // id
+                        items.append(new QStandardItem(cols[1])); // sale_date
+                        items.append(new QStandardItem(cols[2])); // delivery_date
+                        items.append(new QStandardItem(cols[3])); // total_sum
+                        model->appendRow(items);
                     }
-                    model->appendRow(items);
                 }
             }
             ui->tableHistory->setModel(model);

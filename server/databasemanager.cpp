@@ -392,52 +392,7 @@ QList<Order> DatabaseManager::getClientOrders(int id_client) {
     return list;
 }
 
-bool DatabaseManager::createOrder(int id_client, const QList<OrderItem>& items) {
-    QSqlDatabase db = QSqlDatabase::database();
-    db.transaction();
 
-
-    QSqlQuery qOrder;
-    qOrder.prepare(
-        "INSERT INTO orders "
-        "(id_client, sale_date, delivery_date) "
-        "VALUES "
-        "(:id_client, NULL, CURRENT_DATE + INTERVAL '5 days') "
-        "RETURNING id_order"
-        );
-    qOrder.bindValue(":id_client", id_client);
-
-    if (!qOrder.exec() || !qOrder.next()) {
-        db.rollback();
-        return false;
-    }
-    int id_order = qOrder.value(0).toInt();
-
-
-    QSqlQuery qItem;
-    qItem.prepare("INSERT INTO order_items (id_order, id_product, quantity) VALUES (:id_order, :id_product, :qty)");
-    for (const OrderItem& item : items) {
-        qItem.bindValue(":id_order", id_order);
-        qItem.bindValue(":id_product", item.id_product);
-        qItem.bindValue(":qty", item.quantity);
-        if (!qItem.exec()) {
-            db.rollback();
-            return false;
-        }
-    }
-
-
-    QSqlQuery qCheckout;
-    qCheckout.prepare("UPDATE orders SET sale_date = CURRENT_TIMESTAMP WHERE id_order = :id_order");
-    qCheckout.bindValue(":id_order", id_order);
-    if (!qCheckout.exec()) {
-        db.rollback();
-        return false;
-    }
-
-    db.commit();
-    return true;
-}
 
 bool DatabaseManager::updateOrderDeliveryDate(int id_order, const QString& date) {
     QSqlQuery query;
@@ -530,7 +485,9 @@ int DatabaseManager::createCart(int id_client) {
     }
 
     QSqlQuery q;
-    q.prepare("INSERT INTO orders (id_client, sale_date) VALUES (:id, NULL) RETURNING id_order");
+    q.prepare("INSERT INTO orders (id_client, sale_date, delivery_date) "
+              "VALUES (:id, NULL, CURRENT_DATE + INTERVAL '5 days') "
+              "RETURNING id_order");
     q.bindValue(":id", id_client);
     if (q.exec() && q.next()) {
         int newId = q.value(0).toInt();

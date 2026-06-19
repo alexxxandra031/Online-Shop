@@ -137,15 +137,24 @@ AdminWindow::AdminWindow(QWidget *parent)
     });
 
     connect(ui->btnAddProduct, &QPushButton::clicked, this, [this]() {
-        QString name = QInputDialog::getText(this, "Добавить", "Название:");
+        QString name = QInputDialog::getText(this, "Добавить товар", "Название:");
         if (name.isEmpty()) return;
-        double price = QInputDialog::getDouble(this, "Добавить", "Цена:");
-        int stock = QInputDialog::getInt(this, "Добавить", "Количество:");
-        int catId = QInputDialog::getInt(this, "Добавить", "ID категории:");
+
+        double price = QInputDialog::getDouble(this, "Добавить товар", "Цена:", 0, 0, 9999999, 2);
+
+        // Выбор единицы измерения
+        QStringList units = {"шт", "кг", "л", "мм", "г", "мл", "м"};
+        bool ok;
+        QString unit = QInputDialog::getItem(this, "Добавить товар", "Единица измерения:",
+                                             units, 0, false, &ok);
+        if (!ok) return;
+
+        int stock = QInputDialog::getInt(this, "Добавить товар", "Количество на складе:", 0, 0, 9999999);
+        int catId = QInputDialog::getInt(this, "Добавить товар", "ID категории:", 1, 1, 9999999);
 
         ClientManager::getInstance()->sendRequest(
-            QString("ADD_PRODUCT|%1|%2|шт|%3|%4")
-                .arg(name).arg(price).arg(stock).arg(catId)
+            QString("ADD_PRODUCT|%1|%2|%3|%4|%5")
+                .arg(name).arg(price).arg(unit).arg(stock).arg(catId)
             );
     });
 
@@ -265,7 +274,7 @@ AdminWindow::AdminWindow(QWidget *parent)
     });
 
     connect(ui->btnAddManager, &QPushButton::clicked, this, [this]() {
-        QString email = QInputDialog::getText(this, "Добавить менеджера", "Email:");
+        QString email = QInputDialog::getText(this, "Добавить менеджера", "Логин:");
         if (email.isEmpty()) return;
         QString password = QInputDialog::getText(this, "Добавить менеджера", "Пароль:", QLineEdit::Password);
         if (password.isEmpty()) return;

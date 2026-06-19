@@ -62,13 +62,7 @@ void ClientHandler::parseRequest(const QString& request) {
         handleGetDiscounts();
     }
     // заказы
-    else if (command == "CREATE_ORDER") {
-        if (parts.size() != 2) {
-            sendToClient("ERROR|INVALID_FORMAT");
-            return;
-        }
-        handleCreateOrder(parts[1]);
-    }
+
     else if (command == "GET_ALL_ORDERS") {
         handleGetAllOrders();
     }
@@ -465,45 +459,7 @@ void ClientHandler::handleUpdateDiscount(const QString& id,
 }
 
 
-void ClientHandler::handleCreateOrder(const QString& items_data)
-{
-    if (!checkAuthorized())
-        return;
 
-    if (!isClient()) {
-        sendToClient("ACCESS_DENIED");
-        return;
-    }
-    int id_client =
-        DatabaseManager::getInstance()
-            ->getClientIdByUserId(m_userId);
-
-    if (id_client <= 0) {
-        sendToClient("CREATE_ORDER_FAIL|Клиент не найден");
-        return;
-    }
-
-    QList<OrderItem> items;
-
-    for (const QString& pair : items_data.split(";", Qt::SkipEmptyParts)) {
-        QStringList parts = pair.split(":");
-
-        if (parts.size() == 2) {
-            OrderItem item;
-            item.id_product = parts[0].toInt();
-            item.quantity = parts[1].toInt();
-            items.append(item);
-        }
-    }
-    if (items.isEmpty()) {
-        sendToClient("CREATE_ORDER_FAIL|Пустой заказ");
-        return;
-    }
-    if (DatabaseManager::getInstance()->createOrder(id_client, items))
-        sendToClient("CREATE_ORDER_OK");
-    else
-        sendToClient("CREATE_ORDER_FAIL|ошибка создания заказа");
-}
 
 void ClientHandler::handleGetAllOrders()
 {
@@ -540,18 +496,18 @@ void ClientHandler::handleGetClientOrders() {
     }
     int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
     if (id_client <= 0) {
-        sendToClient("CLIENT_ORDERS_DATA|");  // пустой ответ
+        sendToClient("CLIENT_ORDERS_DATA|");
         return;
     }
     QList<Order> orders = DatabaseManager::getInstance()->getClientOrders(id_client);
     QStringList rows;
     for (const auto& o : orders) {
-        QString status = o.delivery_date.isEmpty() ? "в обработке" : "доставка " + o.delivery_date;
+
         rows << QString("%1;%2;%3;%4")
                     .arg(o.id_order)
                     .arg(o.sale_date)
-                    .arg(o.total_sum)
-                    .arg(status);
+                    .arg(o.delivery_date)
+                    .arg(o.total_sum);
     }
     sendToClient("CLIENT_ORDERS_DATA|" + rows.join("#"));
 }

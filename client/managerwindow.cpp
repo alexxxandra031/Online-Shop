@@ -31,7 +31,7 @@ ManagerWindow::ManagerWindow(QWidget *parent)
         }
         else if (command == "ALL_ORDERS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
-            model->setHorizontalHeaderLabels({"id", "дата_продажи", "доставка", "сумма", "id_клиента"});
+            model->setHorizontalHeaderLabels({"id", "название", "цена", "ед.", "остаток", "категория"});
 
             if (parts.size() > 1 && !parts[1].isEmpty()) {
                 QStringList rows = parts[1].split("#", Qt::SkipEmptyParts);
@@ -43,6 +43,12 @@ ManagerWindow::ManagerWindow(QWidget *parent)
             }
             ui->tableOrders->setModel(model);
             ui->tableOrders->horizontalHeader()->setStretchLastSection(true);
+        }
+        else if (command == "UPDATE_PROFILE_OK") {
+            QMessageBox::information(this, "Успех", parts.value(1));
+        }
+        else if (command == "UPDATE_PROFILE_FAIL") {
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
         }
         else if (command == "ALL_CLIENTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);
@@ -100,18 +106,17 @@ ManagerWindow::ManagerWindow(QWidget *parent)
         ClientManager::getInstance()->sendRequest(req);
     });
 
-    connect(ui->btnSaveProfile, &QPushButton::clicked, this, [this]() {
-        QString email = ui->lineEmail->text();
-        QString password = ui->linePassword->text();
-
-
+    connect(ui->btnChangePassword, &QPushButton::clicked, this, [this]() {
+        QString newPassword = ui->lineNewPassword->text();
+        if (newPassword.isEmpty()) {
+            QMessageBox::warning(this, "Ошибка", "Введите новый пароль");
+            return;
+        }
+        // Отправляем команду UPDATE_PROFILE с пустыми полями (только пароль)
         ClientManager::getInstance()->sendRequest(
-            QString("UPDATE_PROFILE|%1|%2|%3|%4|%5")
-                .arg("Сотрудник").arg("Менеджер")
-                .arg(email).arg("нет").arg(password)
+            QString("UPDATE_PROFILE|||||%1").arg(newPassword)
             );
     });
-
     connect(ui->btnEditProduct, &QPushButton::clicked, this, [this]() {
         QModelIndex index = ui->tableStock->currentIndex();
         if (!index.isValid()) {

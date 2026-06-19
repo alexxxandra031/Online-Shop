@@ -57,7 +57,7 @@ private:
 
 
     // заказы
-    void handleCreateOrder(const QString& items_data);
+
     void handleGetAllOrders();
     void handleGetClientOrders();
     void handleUpdateDelivery(const QString& order_id, const QString& date);

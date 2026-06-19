@@ -42,6 +42,7 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
+      <!-- Страница "Управление складом" (без изменений) -->
       <widget class="QWidget" name="pageStock">
        <layout class="QVBoxLayout" name="stockLayout">
         <item>
@@ -65,6 +66,7 @@
         </item>
        </layout>
       </widget>
+      <!-- Страница "Обработка доставки" (без изменений) -->
       <widget class="QWidget" name="pageOrders">
        <layout class="QVBoxLayout" name="ordersLayout">
         <item>
@@ -96,6 +98,7 @@
         </item>
        </layout>
       </widget>
+      <!-- Страница "База клиентов" (без изменений) -->
       <widget class="QWidget" name="pageClients">
        <layout class="QVBoxLayout" name="clientsLayout">
         <item>
@@ -114,32 +117,27 @@
         </item>
        </layout>
       </widget>
+      <!-- Новая страница профиля (как у администратора: только смена пароля) -->
       <widget class="QWidget" name="pageProfile">
        <layout class="QVBoxLayout" name="profLayout">
         <item>
          <widget class="QLabel" name="lblInfoProfile">
           <property name="text">
-           <string>Для обновления профиля нажмите кнопку «Мой профиль» слева, затем сохраните изменения.</string>
+           <string>Смена пароля менеджера</string>
           </property>
           <property name="wordWrap"><bool>true</bool></property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lblProf"><property name="text"><string>Личный профиль сотрудника:</string></property></widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEmail">
-          <property name="placeholderText"><string>Email (Логин)</string></property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="linePassword">
+         <widget class="QLineEdit" name="lineNewPassword">
           <property name="placeholderText"><string>Новый пароль</string></property>
           <property name="echoMode"><enum>QLineEdit::Password</enum></property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btnSaveProfile"><property name="text"><string>Обновить данные профиля</string></property></widget>
+         <widget class="QPushButton" name="btnChangePassword">
+          <property name="text"><string>Сменить пароль</string></property>
+         </widget>
         </item>
         <item>
          <spacer name="profSpacer">
