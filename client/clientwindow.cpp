@@ -62,13 +62,15 @@ ClientWindow::ClientWindow(QWidget *parent)
         }
 
         else if (command == "CREATE_CART_OK") {
+            m_isCheckoutInProgress = false;
             m_currentCartId = parts.value(1).toInt();
             ui->btnSubmitOrder->setEnabled(true);
             updateCartDisplay();
         }
         else if (command == "CREATE_CART_FAIL") {
+            m_isCheckoutInProgress = false;
             ui->btnSubmitOrder->setEnabled(true);
-            QMessageBox::warning(this, "Ошибка", "Не удалось создать новую корзину: " + parts.value(1));
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
         }
         else if (command == "ADD_TO_CART_OK") {
             QMessageBox::information(this, "Успех", "Товар добавлен в корзину");
@@ -104,13 +106,13 @@ ClientWindow::ClientWindow(QWidget *parent)
             this->setWindowTitle(QString("Кабинет Покупателя (Итого: %1 руб.)").arg(total));
         }
         else if (command == "CHECKOUT_OK") {
-            m_isCheckoutInProgress = false;
-            ui->btnSubmitOrder->setEnabled(true);
+            m_isCheckoutInProgress = true;
             QMessageBox::information(this, "Успех", "Заказ оформлен");
             m_currentCartId = -1;
             ui->tableCart->setModel(nullptr);
-
+            ui->btnSubmitOrder->setEnabled(true);
             ClientManager::getInstance()->sendRequest("CREATE_CART");
+
         }
         else if (command == "CHECKOUT_FAIL") {
             m_isCheckoutInProgress = false;
@@ -210,7 +212,7 @@ ClientWindow::~ClientWindow()
 
 void ClientWindow::updateCartDisplay() {
     qDebug() << "updateCartDisplay called with m_currentCartId =" << m_currentCartId;
-    if (m_currentCartId != -1) {
+    if (m_currentCartId != -1 && !m_isCheckoutInProgress) {
         ClientManager::getInstance()->sendRequest(QString("GET_CART|%1").arg(m_currentCartId));
     }
 }

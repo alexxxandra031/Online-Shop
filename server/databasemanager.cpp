@@ -500,21 +500,26 @@ bool DatabaseManager::addManager(const QString& login, const QString& password) 
 }
 
 int DatabaseManager::createCart(int id_client) {
-    // Удаляем старую корзину, если она есть
+
     QSqlQuery del;
     del.prepare("DELETE FROM orders WHERE id_client = :id AND sale_date IS NULL");
     del.bindValue(":id", id_client);
-    del.exec();
+    if (!del.exec()) {
+        qDebug() << "createCart: delete error:" << del.lastError().text();
+    }
 
     QSqlQuery q;
     q.prepare("INSERT INTO orders (id_client, sale_date) VALUES (:id, NULL) RETURNING id_order");
     q.bindValue(":id", id_client);
     if (q.exec() && q.next()) {
-        return q.value(0).toInt();
+        int newId = q.value(0).toInt();
+        qDebug() << "createCart: new order id =" << newId;
+        return newId;
+    } else {
+        qDebug() << "createCart: insert error:" << q.lastError().text();
+        return -1;
     }
-    return -1;
 }
-
 bool DatabaseManager::addToCart(int id_order, int id_product, int quantity) {
     QSqlQuery q;
     q.prepare(
@@ -550,7 +555,7 @@ bool DatabaseManager::checkout(int id_order) {
     q.prepare("UPDATE orders SET sale_date = CURRENT_TIMESTAMP WHERE id_order = :id");
     q.bindValue(":id", id_order);
     if (!q.exec()) {
-        qDebug() << "checkout SQL error:" << q.lastError().text();
+        qDebug() << "checkout error:" << q.lastError().text();
         return false;
     }
     return true;
