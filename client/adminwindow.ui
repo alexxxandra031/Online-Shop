@@ -49,8 +49,11 @@
      <widget class="QStackedWidget" name="stackedWidget">
       <widget class="QWidget" name="pageCatalogCrud">
        <layout class="QVBoxLayout" name="catCrudLayout">
+        <!-- Блок управления товарами -->
         <item>
-         <widget class="QLabel" name="lblC1"><property name="text"><string>Управление товарами и категориями:</string></property></widget>
+         <widget class="QLabel" name="lblC1">
+          <property name="text"><string>Управление товарами:</string></property>
+         </widget>
         </item>
         <item>
          <widget class="QTableView" name="tableCatalogCrud"/>
@@ -58,16 +61,46 @@
         <item>
          <layout class="QHBoxLayout" name="crudBtnLayout1">
           <item>
-           <widget class="QPushButton" name="btnAddProduct"><property name="text"><string>Добавить товар</string></property></widget>
+           <widget class="QPushButton" name="btnAddProduct">
+            <property name="text"><string>Добавить товар</string></property>
+           </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnEditProduct"><property name="text"><string>Изменить товар</string></property></widget>
+           <widget class="QPushButton" name="btnEditProduct">
+            <property name="text"><string>Изменить товар</string></property>
+           </widget>
           </item>
-          <!-- Кнопка "Удалить товар" удалена -->
+          <!-- Кнопка "Удалить товар" отсутствует -->
+         </layout>
+        </item>
+
+        <!-- Блок управления категориями -->
+        <item>
+         <widget class="QLabel" name="lblCategories">
+          <property name="text"><string>Управление категориями:</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableView" name="tableCategories"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="categoryBtnLayout">
+          <item>
+           <widget class="QPushButton" name="btnAddCategory">
+            <property name="text"><string>Добавить категорию</string></property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnEditCategory">
+            <property name="text"><string>Изменить категорию</string></property>
+           </widget>
+          </item>
+          <!-- Кнопка "Удалить категорию" удалена -->
          </layout>
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="pageUsersCrud">
        <layout class="QVBoxLayout" name="userCrudLayout">
         <item>
@@ -88,6 +121,7 @@
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="pageDiscountsCrud">
        <layout class="QVBoxLayout" name="discLayout">
         <item>
@@ -101,21 +135,23 @@
           <item>
            <widget class="QPushButton" name="btnAddDiscount"><property name="text"><string>Добавить скидку</string></property></widget>
           </item>
-          <!-- Кнопка "Удалить скидку" удалена -->
+          <!-- Кнопка "Удалить скидку" отсутствует -->
          </layout>
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="pageArchive">
        <layout class="QVBoxLayout" name="archiveLayout">
         <item>
-         <widget class="QLabel" name="lblAn"><property name="text"><string>Кконтроль продаж:</string></property></widget>
+         <widget class="QLabel" name="lblAn"><property name="text"><string>Контроль продаж:</string></property></widget>
         </item>
         <item>
          <widget class="QTableView" name="tableArchive"/>
         </item>
        </layout>
       </widget>
+
       <widget class="QWidget" name="pageProfile">
        <layout class="QVBoxLayout" name="profLayout">
         <item>
@@ -123,7 +159,7 @@
         </item>
         <item>
          <widget class="QLineEdit" name="lineEmail">
-          <property name="placeholderText"><string>Email Администратора</string></property>
+          <property name="placeholderText"><string>Логин Администратора</string></property>
          </widget>
         </item>
         <item>

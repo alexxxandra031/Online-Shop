@@ -65,6 +65,40 @@ AdminWindow::AdminWindow(QWidget *parent)
             ui->tableArchive->setModel(model);
             ui->tableArchive->horizontalHeader()->setStretchLastSection(true);
         }
+        else if (command == "CATEGORIES_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "название"});
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
+                    QStringList cols = r.split(";");
+                    if (cols.size() >= 2) {
+                        QList<QStandardItem*> items;
+                        items.append(new QStandardItem(cols[0]));
+                        items.append(new QStandardItem(cols[1]));
+                        model->appendRow(items);
+                    }
+                }
+            }
+            ui->tableCategories->setModel(model);
+            ui->tableCategories->horizontalHeader()->setStretchLastSection(true);
+        }
+        else if (command == "CATEGORIES_DATA") {
+            QStandardItemModel *model = new QStandardItemModel(this);
+            model->setHorizontalHeaderLabels({"id", "название"});
+            if (parts.size() > 1 && !parts[1].isEmpty()) {
+                for (const QString &r : parts[1].split("#", Qt::SkipEmptyParts)) {
+                    QStringList cols = r.split(";");
+                    if (cols.size() >= 2) {
+                        QList<QStandardItem*> items;
+                        items.append(new QStandardItem(cols[0])); // id
+                        items.append(new QStandardItem(cols[1])); // name
+                        model->appendRow(items);
+                    }
+                }
+            }
+            ui->tableCategories->setModel(model);
+            ui->tableCategories->horizontalHeader()->setStretchLastSection(true);
+        }
         else if (command.endsWith("_OK")) {
             QMessageBox::information(this, "успех", "операция выполнена успешно");
         }
@@ -76,6 +110,7 @@ AdminWindow::AdminWindow(QWidget *parent)
     connect(ui->btnCatalogCrud, &QPushButton::clicked, this, [this]() {
         ui->stackedWidget->setCurrentWidget(ui->pageCatalogCrud);
         ClientManager::getInstance()->sendRequest("GET_PRODUCTS");
+        ClientManager::getInstance()->sendRequest("GET_CATEGORIES");
     });
 
     connect(ui->btnUsersCrud, &QPushButton::clicked, this, [this]() {
@@ -210,6 +245,36 @@ AdminWindow::AdminWindow(QWidget *parent)
 
         ClientManager::getInstance()->sendRequest(req);
     });
+
+
+    connect(ui->btnAddCategory, &QPushButton::clicked, this, [this]() {
+        QString name = QInputDialog::getText(this, "Добавить категорию", "Название:");
+        if (name.isEmpty()) return;
+        ClientManager::getInstance()->sendRequest(QString("ADD_CATEGORY|%1").arg(name));
+    });
+
+
+    connect(ui->btnEditCategory, &QPushButton::clicked, this, [this]() {
+        QModelIndex index = ui->tableCategories->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите категорию");
+            return;
+        }
+        int catId = ui->tableCategories->model()
+                        ->data(ui->tableCategories->model()->index(index.row(), 0)).toInt();
+        QString oldName = ui->tableCategories->model()
+                              ->data(ui->tableCategories->model()->index(index.row(), 1)).toString();
+        QString newName = QInputDialog::getText(this, "Изменить категорию",
+                                                "Новое название:", QLineEdit::Normal, oldName);
+        if (newName.isEmpty()) return;
+        ClientManager::getInstance()->sendRequest(
+            QString("UPDATE_CATEGORY|%1|%2").arg(catId).arg(newName)
+            );
+    });
+
+
+
+
 }
 
 AdminWindow::~AdminWindow()
