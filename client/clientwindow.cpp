@@ -60,22 +60,15 @@ ClientWindow::ClientWindow(QWidget *parent)
             ui->tableHistory->setModel(model);
             ui->tableHistory->horizontalHeader()->setStretchLastSection(true);
         }
-        else if (command == "CREATE_ORDER_OK") {
-            QMessageBox::information(this, "успех", "заказ успешно отправлен");
-        }
-        else if (command == "CREATE_ORDER_FAIL") {
-            QMessageBox::warning(this, "ошибка", "не удалось создать заказ");
-        }
 
         else if (command == "CREATE_CART_OK") {
-            int cartId = parts.value(1).toInt();
-            m_currentCartId = cartId;
+            m_currentCartId = parts.value(1).toInt();
+            ui->btnSubmitOrder->setEnabled(true);
             updateCartDisplay();
-            ui->stackedWidget->setCurrentWidget(ui->pageNewOrder);
-            QMessageBox::information(this, "Корзина создана", "Новая корзина готова к добавлению товаров.");
         }
         else if (command == "CREATE_CART_FAIL") {
-            QMessageBox::warning(this, "Ошибка", parts.value(1));
+            ui->btnSubmitOrder->setEnabled(true);
+            QMessageBox::warning(this, "Ошибка", "Не удалось создать новую корзину: " + parts.value(1));
         }
         else if (command == "ADD_TO_CART_OK") {
             QMessageBox::information(this, "Успех", "Товар добавлен в корзину");
@@ -116,9 +109,8 @@ ClientWindow::ClientWindow(QWidget *parent)
             QMessageBox::information(this, "Успех", "Заказ оформлен");
             m_currentCartId = -1;
             ui->tableCart->setModel(nullptr);
-            ui->stackedWidget->setCurrentWidget(ui->pageHistory);
-            ClientManager::getInstance()->sendRequest("GET_CLIENT_ORDERS");
-            ClientManager::getInstance()->sendRequest("CREATE_CART"); // создаём новую корзину
+
+            ClientManager::getInstance()->sendRequest("CREATE_CART");
         }
         else if (command == "CHECKOUT_FAIL") {
             m_isCheckoutInProgress = false;
@@ -155,6 +147,7 @@ ClientWindow::ClientWindow(QWidget *parent)
             ClientManager::getInstance()->sendRequest("CREATE_CART");
         } else {
             ui->stackedWidget->setCurrentWidget(ui->pageNewOrder);
+            ui->btnSubmitOrder->setEnabled(true);
             updateCartDisplay();
         }
     });
@@ -216,6 +209,7 @@ ClientWindow::~ClientWindow()
 
 
 void ClientWindow::updateCartDisplay() {
+    qDebug() << "updateCartDisplay called with m_currentCartId =" << m_currentCartId;
     if (m_currentCartId != -1) {
         ClientManager::getInstance()->sendRequest(QString("GET_CART|%1").arg(m_currentCartId));
     }

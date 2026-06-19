@@ -19,7 +19,7 @@
       </item>
       <item>
        <widget class="QPushButton" name="btnUsersCrud">
-        <property name="text"><string>Управление персоналом</string></property>
+        <property name="text"><string>Управление клиентами</string></property>
        </widget>
       </item>
       <item>
@@ -49,11 +49,16 @@
      <widget class="QStackedWidget" name="stackedWidget">
       <widget class="QWidget" name="pageCatalogCrud">
        <layout class="QVBoxLayout" name="catCrudLayout">
-        <!-- Блок управления товарами -->
         <item>
-         <widget class="QLabel" name="lblC1">
-          <property name="text"><string>Управление товарами:</string></property>
+         <widget class="QLabel" name="lblInfoCatalog">
+          <property name="text">
+           <string>Для обновления списка товаров и категорий нажмите кнопку «Каталог и Категории» слева.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblC1"><property name="text"><string>Управление товарами:</string></property></widget>
         </item>
         <item>
          <widget class="QTableView" name="tableCatalogCrud"/>
@@ -73,8 +78,6 @@
           <!-- Кнопка "Удалить товар" отсутствует -->
          </layout>
         </item>
-
-        <!-- Блок управления категориями -->
         <item>
          <widget class="QLabel" name="lblCategories">
           <property name="text"><string>Управление категориями:</string></property>
@@ -100,11 +103,18 @@
         </item>
        </layout>
       </widget>
-
       <widget class="QWidget" name="pageUsersCrud">
        <layout class="QVBoxLayout" name="userCrudLayout">
         <item>
-         <widget class="QLabel" name="lblU1"><property name="text"><string>Управление учетными записями (Регистрация Менеджеров):</string></property></widget>
+         <widget class="QLabel" name="lblInfoUsers">
+          <property name="text">
+           <string>Для обновления списка клиентов нажмите кнопку «Управление клиентами» слева.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblU1"><property name="text"><string>Управление учетными записями клиентов:</string></property></widget>
         </item>
         <item>
          <widget class="QTableView" name="tableUsersCrud"/>
@@ -121,9 +131,16 @@
         </item>
        </layout>
       </widget>
-
       <widget class="QWidget" name="pageDiscountsCrud">
        <layout class="QVBoxLayout" name="discLayout">
+        <item>
+         <widget class="QLabel" name="lblInfoDiscounts">
+          <property name="text">
+           <string>Для обновления списка скидок нажмите кнопку «Система скидок» слева.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="lblD1"><property name="text"><string>Управление правилами скидок системы:</string></property></widget>
         </item>
@@ -140,9 +157,16 @@
         </item>
        </layout>
       </widget>
-
       <widget class="QWidget" name="pageArchive">
        <layout class="QVBoxLayout" name="archiveLayout">
+        <item>
+         <widget class="QLabel" name="lblInfoArchive">
+          <property name="text">
+           <string>Для обновления архивных данных нажмите кнопку «Архив и Выручка» слева.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="lblAn"><property name="text"><string>Контроль продаж:</string></property></widget>
         </item>
@@ -151,9 +175,16 @@
         </item>
        </layout>
       </widget>
-
       <widget class="QWidget" name="pageProfile">
        <layout class="QVBoxLayout" name="profLayout">
+        <item>
+         <widget class="QLabel" name="lblInfoProfile">
+          <property name="text">
+           <string>Для обновления профиля нажмите кнопку «Мой профиль» слева, затем сохраните изменения.</string>
+          </property>
+          <property name="wordWrap"><bool>true</bool></property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="lblProf"><property name="text"><string>Профиль главного администратора базы данных:</string></property></widget>
         </item>
