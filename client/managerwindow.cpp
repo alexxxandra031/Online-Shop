@@ -102,11 +102,12 @@ ManagerWindow::ManagerWindow(QWidget *parent)
         QString email = ui->lineEmail->text();
         QString password = ui->linePassword->text();
 
-        QString req = QString("UPDATE_PROFILE|%1|%2|%3|%4|%5|%6")
-                          .arg(m_userId)
-                          .arg("Сотрудник").arg("Менеджер")
-                          .arg(email).arg("нет").arg(password);
-        ClientManager::getInstance()->sendRequest(req);
+
+        ClientManager::getInstance()->sendRequest(
+            QString("UPDATE_PROFILE|%1|%2|%3|%4|%5")
+                .arg("Сотрудник").arg("Менеджер")
+                .arg(email).arg("нет").arg(password)
+            );
     });
 }
 

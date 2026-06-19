@@ -70,6 +70,8 @@ private:
     void handleAddToCart(const QString& order_id, const QString& product_id, const QString& quantity);
     void handleGetCart(const QString& order_id);
     void handleCheckout(const QString& order_id);
+    void handleRemoveFromCart(const QString& order_id, const QString& product_id);
+    void handleUpdateCartQuantity(const QString& order_id, const QString& product_id, const QString& new_quantity);
     QTcpSocket* m_socket;
     int m_userId = -1;
     QString m_role;

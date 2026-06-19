@@ -188,19 +188,40 @@
          <widget class="QLabel" name="lblProf"><property name="text"><string>Редактирование личных данных:</string></property></widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineFirstName"><property name="placeholderText"><string>Имя</string></property></widget>
+         <widget class="QLineEdit" name="lineFirstName">
+          <property name="placeholderText">
+           <string>Имя (оставьте пустым, если не хотите менять)</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineLastName"><property name="placeholderText"><string>Фамилия</string></property></widget>
+         <widget class="QLineEdit" name="lineLastName">
+          <property name="placeholderText">
+           <string>Фамилия (оставьте пустым, если не хотите менять)</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="linePhone"><property name="placeholderText"><string>Телефон</string></property></widget>
+         <widget class="QLineEdit" name="linePhone">
+          <property name="placeholderText">
+           <string>Телефон (оставьте пустым, если не хотите менять)</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEmail"><property name="placeholderText"><string>Email</string></property></widget>
+         <widget class="QLineEdit" name="lineEmail">
+          <property name="placeholderText">
+           <string>Email (оставьте пустым, если не хотите менять)</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="linePassword"><property name="placeholderText"><string>Новый пароль</string></property><property name="echoMode"><enum>QLineEdit::Password</enum></property></widget>
+         <widget class="QLineEdit" name="linePassword">
+          <property name="placeholderText">
+           <string>Новый пароль (оставьте пустым, если не хотите менять)</string>
+          </property>
+          <property name="echoMode"><enum>QLineEdit::Password</enum></property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="btnSaveProfile"><property name="text"><string>Сохранить изменения</string></property></widget>

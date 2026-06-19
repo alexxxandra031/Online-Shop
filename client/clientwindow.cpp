@@ -110,12 +110,21 @@ ClientWindow::ClientWindow(QWidget *parent)
         }
         else if (command == "CHECKOUT_OK") {
             m_isCheckoutInProgress = false;
+
+            double discountPercent = parts.size() > 1 ? parts[1].toDouble() : 0.0;
+            double totalWithDiscount = parts.size() > 2 ? parts[2].toDouble() : 0.0;
+            if (discountPercent > 0) {
+                ui->lblDiscount->setText(QString("Скидка применена: %1% (сумма с учётом скидки: %2 руб.)")
+                                             .arg(discountPercent, 0, 'f', 2)
+                                             .arg(totalWithDiscount, 0, 'f', 2));
+            } else {
+                ui->lblDiscount->setText("Скидка не применена");
+            }
             QMessageBox::information(this, "Успех", "Заказ оформлен");
             m_currentCartId = -1;
             ui->tableCart->setModel(nullptr);
             ui->btnSubmitOrder->setEnabled(true);
             ClientManager::getInstance()->sendRequest("CREATE_CART");
-
         }
         else if (command == "CHECKOUT_FAIL") {
             m_isCheckoutInProgress = false;
@@ -129,6 +138,20 @@ ClientWindow::ClientWindow(QWidget *parent)
             } else {
                 QMessageBox::warning(this, "Ошибка", parts.value(1));
             }
+        }
+        else if (command == "REMOVE_FROM_CART_OK") {
+            QMessageBox::information(this, "Успех", "Товар удалён из корзины");
+            updateCartDisplay();
+        }
+        else if (command == "REMOVE_FROM_CART_FAIL") {
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
+        }
+        else if (command == "UPDATE_CART_QUANTITY_OK") {
+            QMessageBox::information(this, "Успех", "Количество обновлено");
+            updateCartDisplay();
+        }
+        else if (command == "UPDATE_CART_QUANTITY_FAIL") {
+            QMessageBox::warning(this, "Ошибка", parts.value(1));
         }
         else if (command == "ACCESS_DENIED")
         {
@@ -173,8 +196,8 @@ ClientWindow::ClientWindow(QWidget *parent)
         QString email = ui->lineEmail->text();
         QString password = ui->linePassword->text();
 
-        QString req = QString("UPDATE_PROFILE|%1|%2|%3|%4|%5|%6")
-                          .arg(m_userId)
+
+        QString req = QString("UPDATE_PROFILE|%1|%2|%3|%4|%5")
                           .arg(surname).arg(name).arg(email).arg(phone).arg(password);
         ClientManager::getInstance()->sendRequest(req);
     });
@@ -205,7 +228,42 @@ ClientWindow::ClientWindow(QWidget *parent)
             QString("ADD_TO_CART|%1|%2|%3").arg(m_currentCartId).arg(productId).arg(quantity)
             );
     });
+    connect(ui->btnRemoveFromCart, &QPushButton::clicked, this, [this]() {
+        QModelIndex index = ui->tableCart->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите товар для удаления");
+            return;
+        }
+        int productId = ui->tableCart->model()->data(ui->tableCart->model()->index(index.row(), 0)).toInt();
+        if (m_currentCartId == -1) {
+            QMessageBox::warning(this, "Ошибка", "Нет активной корзины");
+            return;
+        }
+        ClientManager::getInstance()->sendRequest(
+            QString("REMOVE_FROM_CART|%1|%2").arg(m_currentCartId).arg(productId)
+            );
+    });
 
+
+    connect(ui->btnChangeQuantity, &QPushButton::clicked, this, [this]() {
+        QModelIndex index = ui->tableCart->currentIndex();
+        if (!index.isValid()) {
+            QMessageBox::warning(this, "Ошибка", "Выберите товар для изменения количества");
+            return;
+        }
+        int productId = ui->tableCart->model()->data(ui->tableCart->model()->index(index.row(), 0)).toInt();
+        int currentQty = ui->tableCart->model()->data(ui->tableCart->model()->index(index.row(), 2)).toInt();
+        bool ok;
+        int newQty = QInputDialog::getInt(this, "Изменить количество", "Введите новое количество:", currentQty, 1, 999, 1, &ok);
+        if (!ok) return;
+        if (m_currentCartId == -1) {
+            QMessageBox::warning(this, "Ошибка", "Нет активной корзины");
+            return;
+        }
+        ClientManager::getInstance()->sendRequest(
+            QString("UPDATE_CART_QUANTITY|%1|%2|%3").arg(m_currentCartId).arg(productId).arg(newQty)
+            );
+    });
 }
 
 ClientWindow::~ClientWindow()

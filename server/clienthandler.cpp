@@ -109,6 +109,14 @@ void ClientHandler::parseRequest(const QString& request) {
         if (parts.size() != 2) { sendToClient("ERROR|INVALID_FORMAT"); return; }
         handleCheckout(parts[1]);
     }
+    else if (command == "REMOVE_FROM_CART") {
+        if (parts.size() != 3) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleRemoveFromCart(parts[1], parts[2]);
+    }
+    else if (command == "UPDATE_CART_QUANTITY") {
+        if (parts.size() != 4) { sendToClient("ERROR|INVALID_FORMAT"); return; }
+        handleUpdateCartQuantity(parts[1], parts[2], parts[3]);
+    }
     else {
         sendToClient("ERROR|UNKNOWN_COMMAND");
     }
@@ -674,6 +682,8 @@ void ClientHandler::handleCheckout(const QString& order_id) {
         sendToClient("CHECKOUT_FAIL|Корзина пуста");
         return;
     }
+
+
     for (const auto& item : items) {
         int stock = DatabaseManager::getInstance()->getProductStock(item.id_product);
         if (stock < item.quantity) {
@@ -681,9 +691,65 @@ void ClientHandler::handleCheckout(const QString& order_id) {
             return;
         }
     }
+
+
     if (DatabaseManager::getInstance()->checkout(oid)) {
-        sendToClient("CHECKOUT_OK");
+
+        double totalWithDiscount = DatabaseManager::getInstance()->getOrderTotal(oid);
+        QList<OrderDiscount> discounts = DatabaseManager::getInstance()->getOrderDiscounts(oid);
+        double totalDiscount = 0.0;
+        for (const auto& d : discounts) {
+            totalDiscount += d.discount_sum;
+        }
+
+        sendToClient(QString("CHECKOUT_OK|%1|%2").arg(totalDiscount).arg(totalWithDiscount));
     } else {
         sendToClient("CHECKOUT_FAIL|Ошибка оформления");
     }
+}
+
+
+void ClientHandler::handleRemoveFromCart(const QString& order_id, const QString& product_id) {
+    if (!checkAuthorized()) return;
+    if (!isClient()) { sendToClient("ACCESS_DENIED"); return; }
+    int oid = order_id.toInt();
+    int pid = product_id.toInt();
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("REMOVE_FROM_CART_FAIL|Клиент не найден");
+        return;
+    }
+    if (!DatabaseManager::getInstance()->isOrderOwnedByClientAndCart(oid, id_client)) {
+        sendToClient("REMOVE_FROM_CART_FAIL|Заказ не является вашей корзиной");
+        return;
+    }
+    if (DatabaseManager::getInstance()->removeFromCart(oid, pid))
+        sendToClient("REMOVE_FROM_CART_OK");
+    else
+        sendToClient("REMOVE_FROM_CART_FAIL|Ошибка удаления");
+}
+
+void ClientHandler::handleUpdateCartQuantity(const QString& order_id, const QString& product_id, const QString& new_quantity) {
+    if (!checkAuthorized()) return;
+    if (!isClient()) { sendToClient("ACCESS_DENIED"); return; }
+    int oid = order_id.toInt();
+    int pid = product_id.toInt();
+    int qty = new_quantity.toInt();
+    if (qty <= 0) {
+        sendToClient("UPDATE_CART_QUANTITY_FAIL|Количество должно быть > 0");
+        return;
+    }
+    int id_client = DatabaseManager::getInstance()->getClientIdByUserId(m_userId);
+    if (id_client <= 0) {
+        sendToClient("UPDATE_CART_QUANTITY_FAIL|Клиент не найден");
+        return;
+    }
+    if (!DatabaseManager::getInstance()->isOrderOwnedByClientAndCart(oid, id_client)) {
+        sendToClient("UPDATE_CART_QUANTITY_FAIL|Заказ не является вашей корзиной");
+        return;
+    }
+    if (DatabaseManager::getInstance()->updateCartQuantity(oid, pid, qty))
+        sendToClient("UPDATE_CART_QUANTITY_OK");
+    else
+        sendToClient("UPDATE_CART_QUANTITY_FAIL|Ошибка обновления");
 }

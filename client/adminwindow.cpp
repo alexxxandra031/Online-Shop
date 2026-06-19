@@ -171,10 +171,9 @@ AdminWindow::AdminWindow(QWidget *parent)
         QString password = ui->linePassword->text();
 
         ClientManager::getInstance()->sendRequest(
-            QString("UPDATE_PROFILE|%1|%2|%3|%4|%5|%6")
-                .arg(m_userId)
+            QString("UPDATE_PROFILE|%1|%2|%3|%4|%5")
                 .arg("Админ").arg("Главный")
-                .arg(email).arg("нет").arg(password)
+                .arg(email).arg("нет").arg(password) // phone = "нет" (если нет поля)
             );
     });
 

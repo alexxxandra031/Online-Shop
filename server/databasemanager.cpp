@@ -151,12 +151,45 @@ bool DatabaseManager::updateClientProfile(int id_user, const QString& client_sur
     db.transaction();
 
 
+    QStringList setParts;
+    QVariantMap bindValues;
+    if (!client_surname.isEmpty()) {
+        setParts << "surname = :surname";
+        bindValues[":surname"] = client_surname;
+    }
+    if (!name.isEmpty()) {
+        setParts << "name = :name";
+        bindValues[":name"] = name;
+    }
+    if (!email.isEmpty()) {
+        setParts << "email = :email";
+        bindValues[":email"] = email;
+    }
+    if (!phone.isEmpty()) {
+        setParts << "phone = :phone";
+        bindValues[":phone"] = phone;
+    }
+
+    if (!setParts.isEmpty()) {
+        QString sql = "UPDATE clients SET " + setParts.join(", ") + " WHERE id_user = :id_user";
+        QSqlQuery qClient;
+        qClient.prepare(sql);
+        for (auto it = bindValues.begin(); it != bindValues.end(); ++it) {
+            qClient.bindValue(it.key(), it.value());
+        }
+        qClient.bindValue(":id_user", id_user);
+        if (!qClient.exec()) {
+            db.rollback();
+            return false;
+        }
+    }
+
+
     if (!password.isEmpty()) {
         if (!isPasswordValid(password)) {
             db.rollback();
             return false;
         }
-
         QSqlQuery qUser;
         qUser.prepare("UPDATE users SET password = :pass WHERE id_user = :id_user");
         qUser.bindValue(":pass", password);
@@ -165,18 +198,6 @@ bool DatabaseManager::updateClientProfile(int id_user, const QString& client_sur
             db.rollback();
             return false;
         }
-    }
-
-    QSqlQuery qClient;
-    qClient.prepare("UPDATE clients SET surname = :surname, name = :name, email = :email, phone = :phone WHERE id_user = :id_user");
-    qClient.bindValue(":surname", client_surname);
-    qClient.bindValue(":name", name);
-    qClient.bindValue(":email", email);
-    qClient.bindValue(":phone", phone);
-    qClient.bindValue(":id_user", id_user);
-    if (!qClient.exec()) {
-        db.rollback();
-        return false;
     }
 
     db.commit();
@@ -614,4 +635,39 @@ int DatabaseManager::getProductStock(int id_product) {
         return q.value(0).toInt();
     }
     return 0;
+}
+
+
+bool DatabaseManager::removeFromCart(int id_order, int id_product) {
+    QSqlQuery q;
+    q.prepare("DELETE FROM order_items WHERE id_order = :order AND id_product = :product");
+    q.bindValue(":order", id_order);
+    q.bindValue(":product", id_product);
+    return q.exec();
+}
+
+bool DatabaseManager::updateCartQuantity(int id_order, int id_product, int newQuantity) {
+    QSqlQuery q;
+    q.prepare("UPDATE order_items SET quantity = :qty WHERE id_order = :order AND id_product = :product");
+    q.bindValue(":qty", newQuantity);
+    q.bindValue(":order", id_order);
+    q.bindValue(":product", id_product);
+    return q.exec();
+}
+
+QList<OrderDiscount> DatabaseManager::getOrderDiscounts(int id_order) {
+    QList<OrderDiscount> list;
+    QSqlQuery q;
+    q.prepare("SELECT id_discount, id_order, discount_sum FROM order_discounts WHERE id_order = :id");
+    q.bindValue(":id", id_order);
+    if (q.exec()) {
+        while (q.next()) {
+            OrderDiscount od;
+            od.id_discount = q.value(0).toInt();
+            od.id_order = q.value(1).toInt();
+            od.discount_sum = q.value(2).toDouble();
+            list.append(od);
+        }
+    }
+    return list;
 }

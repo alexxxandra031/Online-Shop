@@ -77,6 +77,9 @@ public:
     double getProductPrice(int id_product);
     void cleanupAbandonedCart(int id_client);
     int getProductStock(int id_product);
+    bool removeFromCart(int id_order, int id_product);
+    bool updateCartQuantity(int id_order, int id_product, int newQuantity);
+    QList<OrderDiscount> getOrderDiscounts(int id_order);
 
     friend class DatabaseDestroyer;
 };
