@@ -72,7 +72,7 @@ int DatabaseManager::getClientIdByUserId(int id_user)
 
 bool DatabaseManager::loginUser(const QString& login, const QString& password, QStringList& outRoles, int& outId) {
     QSqlQuery query;
-    query.prepare("SELECT id_user, password FROM users WHERE login = :login"); // email -> login
+    query.prepare("SELECT id_user, password FROM users WHERE login = :login");
     query.bindValue(":login", login);
 
     if (!query.exec() || !query.next()) return false;

@@ -217,7 +217,7 @@ void ClientHandler::handleGetClients()
 {
     if (!checkAuthorized())
         return;
-    if (!isAdmin()) {
+    if (!isAdmin() && !isManager()) {
         sendToClient("ACCESS_DENIED");
         return;
     }

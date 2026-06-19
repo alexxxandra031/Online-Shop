@@ -9,9 +9,12 @@ AdminWindow::AdminWindow(QWidget *parent)
     ui->setupUi(this);
 
 
-    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
+    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &rawData) {
+        QString data = rawData.trimmed();
+
         QStringList parts = data.split("|");
-        QString command = parts.value(0);
+        QString command = parts.value(0).trimmed();
+
         qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
             QStandardItemModel *model = new QStandardItemModel(this);

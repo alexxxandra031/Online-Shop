@@ -12,9 +12,14 @@ AuthWindow::AuthWindow(QWidget *parent)
     ui->setupUi(this);
 
     // ответы от сервера
-    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
+    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &rawData) {
+        QString data = rawData.trimmed();
+
         QStringList parts = data.split("|");
-        QString command = parts.value(0);
+        QString command = parts.value(0).trimmed();
+
+
+        qDebug() << "[CLIENT] Received:" << data;
 
         if (command == "LOGIN_OK") {
             int userId = parts.value(2).toInt();
