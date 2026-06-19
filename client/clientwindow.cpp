@@ -10,9 +10,12 @@ ClientWindow::ClientWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &data) {
+    connect(ClientManager::getInstance(), &ClientManager::dataReceived, this, [this](const QString &rawData) {
+        QString data = rawData.trimmed();
+
         QStringList parts = data.split("|");
-        QString command = parts.value(0);
+        QString command = parts.value(0).trimmed();
+
         qDebug() << "[CLIENT] Received:" << data;
         if (command == "PRODUCTS_DATA") {
 
@@ -106,7 +109,7 @@ ClientWindow::ClientWindow(QWidget *parent)
             this->setWindowTitle(QString("Кабинет Покупателя (Итого: %1 руб.)").arg(total));
         }
         else if (command == "CHECKOUT_OK") {
-            m_isCheckoutInProgress = true;
+            m_isCheckoutInProgress = false;
             QMessageBox::information(this, "Успех", "Заказ оформлен");
             m_currentCartId = -1;
             ui->tableCart->setModel(nullptr);
@@ -202,6 +205,7 @@ ClientWindow::ClientWindow(QWidget *parent)
             QString("ADD_TO_CART|%1|%2|%3").arg(m_currentCartId).arg(productId).arg(quantity)
             );
     });
+
 }
 
 ClientWindow::~ClientWindow()
