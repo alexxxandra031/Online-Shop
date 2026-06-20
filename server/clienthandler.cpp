@@ -354,7 +354,7 @@ void ClientHandler::handleAddCategory(const QString& name)
 {
     if (!checkAuthorized())
         return;
-    if (!isAdmin() && !isManager()) {
+    if (!isAdmin()) {
         sendToClient("ACCESS_DENIED");
         return;
     }
@@ -373,7 +373,7 @@ void ClientHandler::handleUpdateCategory(const QString& id,
 {
     if (!checkAuthorized())
         return;
-    if (!isAdmin() && !isManager()) {
+    if (!isAdmin()) {
         sendToClient("ACCESS_DENIED");
         return;
     }
